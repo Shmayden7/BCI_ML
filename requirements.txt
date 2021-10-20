@@ -2,4 +2,4 @@ black--21.9b0
 pylint--2.11.1 
 numpy--1.21.2
 matplotlib--3.4.3 
-
+python-osc-1.8.0
