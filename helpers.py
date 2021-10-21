@@ -1,4 +1,5 @@
 import csv
+import time
 
 # returns an array of int's from a .csv
 def getBasicCsvData(filePath):
@@ -16,4 +17,15 @@ def getBasicCsvData(filePath):
             dataVector.append(number)
         
     return dataVector
+
+def sampleData(sampleRate, data):
+    for i in range(len(data)):
+        time1 = time.time()
+        while True:
+            if time.time() > (time1 + 1/sampleRate):  # check to see if a tenth of a second has passed
+                break
+
+        return data[i]
+
+
 
