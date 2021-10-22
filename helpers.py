@@ -18,14 +18,12 @@ def getBasicCsvData(filePath):
         
     return dataVector
 
-def sampleData(sampleRate, data):
-    for i in range(len(data)):
-        time1 = time.time()
-        while True:
-            if time.time() > (time1 + 1/sampleRate):  # check to see if a tenth of a second has passed
-                break
+def sampleRateDelay(sampleRate, value):   #Delays returning the next data point from the csv file based on the sample rate of the data  
+    time1 = time.time()
+    while True:
+        if time.time() > (time1 + 1/sampleRate):  # check to see if a tenth of a second has passed
+            break
 
-        return data[i]
-
+    return value
 
 
