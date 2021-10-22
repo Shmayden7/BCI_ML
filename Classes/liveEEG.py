@@ -23,5 +23,4 @@ class liveEEG:
         
         return real_value
 
-while True:
-    print(liveEEG.getData('192.168.2.23', 8000))
+
