@@ -1,6 +1,6 @@
 import csv
 import time
-import numpy
+import numpy as np
 
 # returns an array of int's from a .csv
 def getBasicCsvData(filePath):
@@ -28,16 +28,12 @@ def sampleRateDelay(sampleRate, value):   #Delays returning the next data point 
     return value
 
 def MAV(data):
-    sum = 0
+    mean = np.mean(data)
+    print(mean)
     totalDistance = 0
-    for x in data:
-        sum = sum + data[x]
-    mean = sum / len(data)
-
-    for y in data:
-        totalDistance = totalDistance + abs(data[x]-mean)
+    for y in range(len(data)):
+        totalDistance = totalDistance + abs(data[y]-mean)
     mav = totalDistance / len(data)
     return mav
-
 
 
