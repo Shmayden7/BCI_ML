@@ -16,7 +16,7 @@ def getRefAyden(index):
     return (localPath + localFiles[index])
 
 def getRefJosh(index):
-    localPath = ''
+    localPath = 'C:/Users/henrij2/Desktop/Work/Neuromore/Data/ProcessedData/'
 
     localFiles = [
         'C-160224.csv',
