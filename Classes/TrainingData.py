@@ -4,9 +4,11 @@ import time
 class TrainingData:
 
     frequency = 200
-    data = []
     time = 0
     filePath = ''
+    data = []
+    ml_X = []
+    ml_y = []
 
     def __init__(self, filePath):
         self.filePath = filePath

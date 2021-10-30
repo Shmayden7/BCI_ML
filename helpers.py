@@ -2,23 +2,6 @@ import csv
 import time
 import numpy as np
 
-# returns an array of int's from a .csv
-def getBasicCsvData(filePath):
-    dataVector = [] # return vector
-
-    # Importing C3 amplitude from local .csv
-    with open(f'{filePath}', 'r') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        next(csv_reader) # skips the first index
-
-        for line in csv_reader:
-            string = line[0] # Voltage as a string
-            split = string.split('.') # Array containing intiger and decimal
-            number = int(split[0]) 
-            dataVector.append(number)
-        
-    return dataVector
-
 def sampleRateDelay(sampleRate, value):   #Delays returning the next data point from the csv file based on the sample rate of the data  
     time1 = time.time()
     while True:
@@ -27,13 +10,54 @@ def sampleRateDelay(sampleRate, value):   #Delays returning the next data point 
 
     return value
 
-def MAV(data):
-    mean = np.mean(data)
-    print(mean)
-    totalDistance = 0
-    for y in range(len(data)):
-        totalDistance = totalDistance + abs(data[y]-mean)
-    mav = totalDistance / len(data)
-    return mav
+# Utility Functions
+##################################
+def fillBucket(bucketNumber, data):
+    startingRow = bucketNumber*6
+    bucket = []
+    for i in range(len(data)):
+        colVector = []
+        for j in range(startingRow, startingRow+6):
+            colVector.append(data[i][j])
+        bucket.append(colVector)
+    return bucket
+
+##################################
 
 
+# Feature Functions
+##################################
+def mav(bucket):
+    mavArray = []
+    mav = 0
+
+    for col in bucket:
+        mean = np.mean(col)
+        absDev = 0
+        for row in col:
+            absDev += abs(row - mean)
+        mav = absDev/len(col)
+        mavArray.append(mav)
+
+    return mavArray
+    
+def aveOfCol(bucket):
+    aveCol = []
+    mean = 0
+
+    for col in bucket: 
+        
+        mean = np.mean(col)
+        aveCol.append(mean)
+    
+    return aveCol
+
+def maxDiff(bucket):
+    diff = []
+
+    for col in range(len(bucket)):
+        value = np.amax(bucket[col]) - np.amin(bucket[col])
+        diff.append(value)
+    return diff
+
+##################################
