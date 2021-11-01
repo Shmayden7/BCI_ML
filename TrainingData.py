@@ -1,5 +1,6 @@
 import csv
 import time
+from Other.helpers import *
 
 class TrainingData:
 
@@ -23,6 +24,9 @@ class TrainingData:
 
         # set the total time for the file
         self.setTime()
+
+        # set ML X matrix and y vector
+        self.setMl_XY()
 
     def fillData(self):
         dataHolder = [
@@ -53,9 +57,52 @@ class TrainingData:
                     dataHolder[rowIndex].append(double)
                     row = row+1
         toc = time.perf_counter()
-        print(f'Data from {self.filePath[-13:]} has been populated in {toc - tic:0.4}s!')
+        print(f'Data from {self.filePath[-12:]} has been populated in {toc - tic:0.4}s!')
         self.data = dataHolder
 
     def setTime(self):
         colLength = len(self.data[0])
         self.time = colLength / self.frequency
+
+    def setMl_XY(self):
+
+        x = []
+        y = []
+
+        # Structure of x
+        #  [f1_c1,f1_c2...,f2_c1,,,,,] b=1 (training example 1)
+        #  [,,,,,,,] b=2
+        #  [,,,,,,,] b=3
+        #  [,,,,,,,] b=4
+
+        # Number of full buckets in instance
+        numOfBuckets = len(self.data) // 6
+        for bucketNum in range(numOfBuckets):
+
+            # Bucketing Data
+            currentBucket = np.array(fillBucket(bucketNum, self.data)) # Bucketing Data
+
+            # Dividing info from bucket
+            eegChannels = currentBucket[range(0,8),:]
+            alphaPower = currentBucket[range(8,17),:]  
+            betaPower = currentBucket[range(17, 24),:] 
+            bothPowers = currentBucket[range(8,24),:]
+            markers = currentBucket[24,:] 
+
+            if len(set(markers)) == 1: # Checks if there are different marker values in bucket
+                
+                # Creating channels from info
+                aveVol = aveOfCol(eegChannels)
+                mavOfVol = mav(eegChannels)
+                aveAlphaPower = aveOfCol(alphaPower)
+                aveBetaPower = aveOfCol(betaPower)
+                diffOfPower = maxDiff(bothPowers)
+
+                # Filling features for bucket, add row to matrix
+                row = aveVol + mavOfVol + aveAlphaPower + aveBetaPower + diffOfPower
+                x.append(row)
+                y.append(list(set(markers))[0])
+        
+        self.ml_X = x
+        self.ml_y = y
+
