@@ -1,18 +1,25 @@
 import csv
 import time
-from Other.helpers import *
+import numpy as np
+
+from .Other.featureFunctions import mav, aveOfCol, maxDiff
+from .Other.utilFunctions import fillBucket
 
 class TrainingData:
 
     frequency = 200
     time = 0
     filePath = ''
+    numOfBuckets = 0
+    nullPercentage = 0
     data = []
     ml_X = []
     ml_y = []
 
-    def __init__(self, filePath):
+    def __init__(self, filePath, nullPercentage = 0.3, numOfBuckets = 0):
         self.filePath = filePath
+        self.numOfBuckets = numOfBuckets
+        self.nullPercentage = nullPercentage
 
         # Updating frequency for high frequency files
         lastLetters = filePath[-9:-4]
@@ -25,8 +32,12 @@ class TrainingData:
         # set the total time for the file
         self.setTime()
 
+        # setting the numOfBuckets optional param
+        self.setNumOfBuckets()
+
         # set ML X matrix and y vector
         self.setMl_XY()
+
 
     def fillData(self):
         dataHolder = [
@@ -42,7 +53,7 @@ class TrainingData:
             # skips the first 2 rows of the data files (name + sample rate)
             next(csv_reader)
             next(csv_reader)
-            print('Populating Matrix...')
+            print('\nPopulating Matrix...')
 
             for col in csv_reader: # Row by Row of matrix
                 row = 0
@@ -64,6 +75,10 @@ class TrainingData:
         colLength = len(self.data[0])
         self.time = colLength / self.frequency
 
+    def setNumOfBuckets(self):
+        if self.numOfBuckets == 0:
+            self.numOfBuckets = len(self.data[0]) // 6
+
     def setMl_XY(self):
 
         x = []
@@ -74,13 +89,16 @@ class TrainingData:
         #  [,,,,,,,] b=2
         #  [,,,,,,,] b=3
         #  [,,,,,,,] b=4
+        tic = time.perf_counter()
+        print("Populating feature matrix & Y vector...")
+        filledBuckets = 0
+        numOfZeroes = 0
 
         # Number of full buckets in instance
-        numOfBuckets = len(self.data) // 6
-        for bucketNum in range(numOfBuckets):
+        for bucketNum in range(self.numOfBuckets):
 
             # Bucketing Data
-            currentBucket = np.array(fillBucket(bucketNum, self.data)) # Bucketing Data
+            currentBucket = np.array(fillBucket(bucketNum, self.data)) 
 
             # Dividing info from bucket
             eegChannels = currentBucket[range(0,8),:]
@@ -98,11 +116,31 @@ class TrainingData:
                 aveBetaPower = aveOfCol(betaPower)
                 diffOfPower = maxDiff(bothPowers)
 
+                # Assigning value in y vector
+                currentValue = list(set(markers))[0]
+                vectorValue = 0
+
+                # Defining static and movement states
+                if currentValue == 0 or currentValue == 91 or currentValue == 92 or currentValue == 99 or currentValue == 3 or currentValue == 5:
+                    vectorValue = 0
+                    numOfZeroes += 1
+                else: 
+                    vectorValue = currentValue
+                
+                #Check if null percentage has been reached
+                if numOfZeroes / self.numOfBuckets >= self.nullPercentage and vectorValue == 0:
+                    continue #skips current iteration
+                    
                 # Filling features for bucket, add row to matrix
                 row = aveVol + mavOfVol + aveAlphaPower + aveBetaPower + diffOfPower
                 x.append(row)
-                y.append(list(set(markers))[0])
-        
+
+                y.append(vectorValue)
+                filledBuckets += 1 
+
+        toc = time.perf_counter()
+        print(f"{filledBuckets} buckets have been filled in {toc - tic:0.4}s!")
+
         self.ml_X = x
         self.ml_y = y
 
