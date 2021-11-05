@@ -10,27 +10,40 @@ def fillBucket(bucketNumber, data):
         bucket.append(colVector)
     return bucket
 
-def getFileRef(index, userID):
+def getCSVRef(index, userID, divisionID):
     localPath = [
         '/Users/Ayden/Documents/BCI/ML_Training/selectChannels/',
         'C:/Users/henrij2/Desktop/Work/Neuromore/Data/ProcessedData/',
     ]
 
-    localFiles = [
-        # 'test_1.csv',
-        # 'test_2.csv',
+    set_1_25 = [
+        'test_1.csv',
+        'test_2.csv',
         'C-160224.csv',
         'E-160304.csv',
         'F-160202.csv',
         'G-160412.csv',
         'H-160720.csv',
-        'I-160628.csv',
+        'I-160628.csv', #
         'J-161121.csv',
         'K-161108.csv',
         'L-161205.csv',
         'M-161117.csv',
     ]
-    return (localPath[userID] + localFiles[index])
+
+    sets = {
+        1: set_1_25
+    }
+
+    return (localPath[userID] + sets[divisionID][index])
+
+def getClassifierRef(userID):
+    localPath = [
+        '/Users/Ayden/Documents/BCI/ML_Training/classifiers/',
+        'C:/Users/henrij2/Desktop/Work/Neuromore/Classifiers/'
+    ]
+
+    return localPath[userID]
 
 def sampleRateDelay(sampleRate, value):   #Delays returning the next data point from the csv file based on the sample rate of the data  
     time1 = time.time()

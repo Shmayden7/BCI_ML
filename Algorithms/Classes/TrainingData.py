@@ -1,8 +1,9 @@
 import csv
 import time
 import numpy as np
+from scipy.sparse import data
 
-from .Other.featureFunctions import mav, aveOfCol, maxDiff
+from .Other.determiningFeatures import getRowFromBucket
 from .Other.utilFunctions import fillBucket
 
 class TrainingData:
@@ -15,11 +16,15 @@ class TrainingData:
     data = []
     ml_X = []
     ml_y = []
+    divisionID = 1
+    featureID = 1 
 
-    def __init__(self, filePath, nullPercentage = 0.3, numOfBuckets = 0):
+    def __init__(self, filePath, divisionID, featureID, nullPercentage = 0.3, numOfBuckets = 0):
         self.filePath = filePath
         self.numOfBuckets = numOfBuckets
         self.nullPercentage = nullPercentage
+        self.divisionID = divisionID
+        self.featureID = featureID
 
         # Updating frequency for high frequency files
         lastLetters = filePath[-9:-4]
@@ -40,35 +45,37 @@ class TrainingData:
 
 
     def fillData(self):
-        dataHolder = [
-            [],[],[],[],[],[],[],[],[],[],
-            [],[],[],[],[],[],[],[],[],[],
-            [],[],[],[],[]
-        ]
+
+        dataHolder = []
+        print(f"\nPopulating data from: {self.filePath[-12:-4]}...")
 
         tic = time.perf_counter()
         # Importing csv data from local file
         with open(f'{self.filePath}', 'r') as csv_file:
             csv_reader = csv.reader(csv_file)
+            
             # skips the first 2 rows of the data files (name + sample rate)
             next(csv_reader)
             next(csv_reader)
-            print('\nPopulating Matrix...')
 
-            for col in csv_reader: # Row by Row of matrix
-                row = 0
-                for rowIndex in range(len(col)): # indices of each row 
-                    string = col[rowIndex] # Voltage as a string
+            for rowIndex, row in enumerate(csv_reader): # Row by Row of matrix
+                colIndex = 0
+                for colIndex in range(len(row)): # indices of each row 
+
+                    if rowIndex == 0:
+                        dataHolder.append([])
+
+                    string = row[colIndex] # Voltage as a string
                     double = float(string) # convert string -> double 
 
                     if (double == 0.0 or double == -0.0): # making the 0's look nice
                         double = 0
 
-                    #print(rowIndex)
-                    dataHolder[rowIndex].append(double)
-                    row = row+1
+                    dataHolder[colIndex].append(double)
+                    colIndex += 1
+
         toc = time.perf_counter()
-        print(f'Data from {self.filePath[-12:]} has been populated in {toc - tic:0.4}s!')
+        print(f'Data has been populated in {toc - tic:0.4}s!')
         self.data = dataHolder
 
     def setTime(self):
@@ -100,42 +107,29 @@ class TrainingData:
             # Bucketing Data
             currentBucket = np.array(fillBucket(bucketNum, self.data)) 
 
-            # Dividing info from bucket
-            eegChannels = currentBucket[range(0,8),:]
-            alphaPower = currentBucket[range(8,17),:]  
-            betaPower = currentBucket[range(17, 24),:] 
-            bothPowers = currentBucket[range(8,24),:]
-            markers = currentBucket[24,:] 
+            # Determining Markers
+            markers = currentBucket[len(currentBucket) - 1,:] 
 
-            if len(set(markers)) == 1: # Checks if there are different marker values in bucket
-                
-                # Creating channels from info
-                aveVol = aveOfCol(eegChannels)
-                mavOfVol = mav(eegChannels)
-                aveAlphaPower = aveOfCol(alphaPower)
-                aveBetaPower = aveOfCol(betaPower)
-                diffOfPower = maxDiff(bothPowers)
-
+            if len(set(markers)) == 1:
                 # Assigning value in y vector
-                currentValue = list(set(markers))[0]
-                vectorValue = 0
+                currentMarkerValue = list(set(markers))[0]
+                returnMarkerValue = 0
 
-                # Defining static and movement states
-                if currentValue == 0 or currentValue == 91 or currentValue == 92 or currentValue == 99 or currentValue == 3 or currentValue == 5:
-                    vectorValue = 0
+                # Defining static and movement states (marker value)
+                if currentMarkerValue == 0 or currentMarkerValue == 91 or currentMarkerValue == 92 or currentMarkerValue == 99 or currentMarkerValue == 3 or currentMarkerValue == 5:
+                    returnMarkerValue = 0
                     numOfZeroes += 1
                 else: 
-                    vectorValue = currentValue
-                
-                #Check if null percentage has been reached
-                if numOfZeroes / self.numOfBuckets >= self.nullPercentage and vectorValue == 0:
-                    continue #skips current iteration
-                    
-                # Filling features for bucket, add row to matrix
-                row = aveVol + mavOfVol + aveAlphaPower + aveBetaPower + diffOfPower
-                x.append(row)
+                    returnMarkerValue = currentMarkerValue
 
-                y.append(vectorValue)
+                #Check if null percentage has been reached
+                if numOfZeroes / self.numOfBuckets >= self.nullPercentage and returnMarkerValue == 0:
+                    continue #skips current iteration
+
+                rowOfFeatures = getRowFromBucket(currentBucket, self.divisionID, self.featureID)
+
+                x.append(rowOfFeatures)
+                y.append(returnMarkerValue)
                 filledBuckets += 1 
 
         toc = time.perf_counter()

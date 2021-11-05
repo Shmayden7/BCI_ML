@@ -1,16 +1,17 @@
+import pickle
+
 from .Classes.TrainingData import TrainingData
-from .Classes.Other.utilFunctions import getFileRef
+from .Classes.Other.utilFunctions import getCSVRef, getClassifierRef
 
-
-def createDataSet(userID, numOfInstances, nullPercentage):
+def createDataSet(userID, divisionID, featureID, nullPercentage, numOfCSVs, startingPoint=0):
     instanceArray = []
-    print(f"\nCreating a data set from {numOfInstances} CSV files...")
-    if numOfInstances <= 9:
-        for x in range(numOfInstances):
-            instanceArray.append(TrainingData(getFileRef(x,userID), nullPercentage))
+    print(f"\nCreating a data set from {numOfCSVs} CSV files...")
+    if numOfCSVs <= 10:
+        for x in range(startingPoint, (numOfCSVs + startingPoint)):
+            instanceArray.append(TrainingData(getCSVRef(x,userID, divisionID), divisionID, featureID, nullPercentage))
 
     return instanceArray
-# Needs to be tested
+
 def mergeInstanceData(instanceArray):
     final_x = []
     final_y = []
@@ -28,4 +29,16 @@ def mergeInstanceData(instanceArray):
     print("\nData has been merged!")
     print(f"Total Data Entries: {len(final_x)}")
     return final_x, final_y
-       
+ 
+def readAlgorithm(fileName, userID):
+    filePath = getClassifierRef(userID)
+    classifier = pickle.load(open((filePath + fileName), 'rb'))
+    print(f'Classifier has loaded!')
+    return classifier
+
+def writeAlgorithm(fileName, classifier, userID):
+    filePath = getClassifierRef(userID)
+    with open((filePath + fileName), 'wb') as file:
+        pickle.dump(classifier, file)
+
+    print(f"\nWrote Classifier to: {filePath + fileName}")
