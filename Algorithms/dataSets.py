@@ -1,4 +1,6 @@
 import pickle
+import random
+from .Classes.Other.utilFunctions import sets
 
 from .Classes.TrainingData import TrainingData
 from .Classes.Other.utilFunctions import getCSVRef, getClassifierRef
@@ -8,9 +10,23 @@ def createDataSet(userID, divisionID, featureID, nullPercentage, numOfCSVs, star
     print(f"\nCreating a data set from {numOfCSVs} CSV files...")
     if numOfCSVs <= 10:
         for x in range(startingPoint, (numOfCSVs + startingPoint)):
-            instanceArray.append(TrainingData(getCSVRef(x,userID, divisionID), divisionID, featureID, nullPercentage))
+            instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, featureID, nullPercentage))
 
     return instanceArray
+
+def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfCSVs):
+    instanceArray = []
+    print(f"\nCreating a random data set from {numOfCSVs} CSV files...")
+    randomNumbers = []
+    
+    if numOfCSVs <= 10:
+        for x in range(numOfCSVs):
+            r = random.randint(0, len(sets[divisionID]))
+            if r not in randomNumbers:
+                randomNumbers.append(r)
+                instanceArray.append(TrainingData(getCSVRef(r,userID,divisionID), divisionID, featureID, nullPercentage))
+            else:
+                x -= 1
 
 def mergeInstanceData(instanceArray):
     final_x = []

@@ -1,5 +1,26 @@
 import time
 
+# Datasets
+set_1_25 = [
+        # 'test_1.csv',
+        # 'test_2.csv',
+        'C-160224.csv',
+        'E-160304.csv',
+        'F-160202.csv',
+        'G-160412.csv',
+        'H-160720.csv',
+        'I-160628.csv',
+        'J-161121.csv',
+        'K-161108.csv',
+        'L-161205.csv',
+        'M-161117.csv',
+    ]
+
+sets = {
+        1: set_1_25
+    }
+
+# Functions
 def fillBucket(bucketNumber, data):
     startingRow = bucketNumber*6
     bucket = []
@@ -15,25 +36,6 @@ def getCSVRef(index, userID, divisionID):
         '/Users/Ayden/Documents/BCI/ML_Training/selectChannels/',
         'C:/Users/henrij2/Desktop/Work/Neuromore/Data/ProcessedData/',
     ]
-
-    set_1_25 = [
-        'test_1.csv',
-        'test_2.csv',
-        'C-160224.csv',
-        'E-160304.csv',
-        'F-160202.csv',
-        'G-160412.csv',
-        'H-160720.csv',
-        'I-160628.csv', #
-        'J-161121.csv',
-        'K-161108.csv',
-        'L-161205.csv',
-        'M-161117.csv',
-    ]
-
-    sets = {
-        1: set_1_25
-    }
 
     return (localPath[userID] + sets[divisionID][index])
 

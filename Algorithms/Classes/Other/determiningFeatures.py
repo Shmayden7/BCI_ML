@@ -14,7 +14,7 @@ def divideBucket(currentBucket, divisionID):
             'betaPower': betaPower,
             'bothPowers': bothPowers
         }
-
+    
     return divisions
 
 def determineFeaturesFromDivision(divisions, featureID):
