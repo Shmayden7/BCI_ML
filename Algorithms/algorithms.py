@@ -97,7 +97,7 @@ def testClassifier(classifier, instanceArray):
     y_pred = classifier.predict(normalized_test_x)
     toc = time.perf_counter()
 
-    print(f'Classifier was built & tested in {toc - tic:0.4}s!')
+    print(f'Classifier was tested in {toc - tic:0.4}s!')
 
     #print(confusion_matrix(y_test, y_pred))
     print(classification_report(test_y, y_pred))
