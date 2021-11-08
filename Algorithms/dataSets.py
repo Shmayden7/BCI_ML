@@ -14,19 +14,21 @@ def createDataSet(userID, divisionID, featureID, nullPercentage, numOfCSVs, star
 
     return instanceArray
 
-def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfCSVs):
+randomNumbers = [] 
+def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfCSVs, startingPoint = 0):
     instanceArray = []
     print(f"\nCreating a random data set from {numOfCSVs} CSV files...")
-    randomNumbers = []
     
-    if numOfCSVs <= 10:
-        for x in range(numOfCSVs):
-            r = random.randint(0, len(sets[divisionID]))
+    if numOfCSVs <= len(sets[divisionID]):
+        x = 0
+        while x < numOfCSVs:
+            r = random.randint(startingPoint, len(sets[divisionID]) - 1)
             if r not in randomNumbers:
+                x = x + 1
                 randomNumbers.append(r)
                 instanceArray.append(TrainingData(getCSVRef(r,userID,divisionID), divisionID, featureID, nullPercentage))
-            else:
-                x -= 1
+
+    return instanceArray
 
 def mergeInstanceData(instanceArray):
     final_x = []
