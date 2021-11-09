@@ -20,9 +20,8 @@ def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfCSVs
     print(f"\nCreating a random data set from {numOfCSVs} CSV files...")
     
     if numOfCSVs <= len(sets[divisionID]):
-        x = 0
-        while x < numOfCSVs:
-            r = random.randint(startingPoint, len(sets[divisionID]) - 1)
+        for x in range(numOfCSVs):
+            r = random.randint(0, len(sets[divisionID]))
             if r not in randomNumbers:
                 x = x + 1
                 randomNumbers.append(r)

@@ -14,7 +14,7 @@ from sklearn.neural_network import MLPClassifier
 # Training Classification Algorithms
 
 # Random Forest Classifier
-def trainRandomForest(instanceArray, numOfTrees):
+def trainRF(instanceArray, numOfTrees):
     train_x, train_y = mergeInstanceData(instanceArray)
 
     tic = time.perf_counter()
@@ -97,10 +97,15 @@ def testClassifier(classifier, instanceArray):
     y_pred = classifier.predict(normalized_test_x)
     toc = time.perf_counter()
 
-    print(f'Classifier was tested in {toc - tic:0.4}s!')
+    accuracyScore = accuracy_score(test_y, y_pred)
+    percentage = int(round((accuracyScore*100),0))
+
+    print(f'Classifier was built & tested in {toc - tic:0.4}s!')
 
     #print(confusion_matrix(y_test, y_pred))
     print(classification_report(test_y, y_pred))
-    print('Accuracy score:' + str(accuracy_score(test_y, y_pred)))
+    print('Accuracy score:' + str(accuracyScore))
+
+    return percentage
     
     
