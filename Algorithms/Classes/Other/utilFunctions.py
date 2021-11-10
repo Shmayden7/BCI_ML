@@ -34,7 +34,7 @@ def fillBucket(bucketNumber, data):
 def getCSVRef(index, userID, divisionID):
     localPath = [
         '/Users/Ayden/Documents/BCI/ML_Training/selectChannels/',
-        'C:/Users/henrij2/Desktop/Work/Neuromore/Data/ProcessedData/',
+        'C:/Users/henrij2/Desktop/Work/Data/ProcessedData/',
     ]
 
     return (localPath[userID] + sets[divisionID][index])
@@ -42,7 +42,7 @@ def getCSVRef(index, userID, divisionID):
 def getClassifierRef(userID):
     localPath = [
         '/Users/Ayden/Documents/BCI/ML_Training/classifiers/',
-        'C:/Users/henrij2/Desktop/Work/Neuromore/Classifiers/'
+        'C:/Users/henrij2/Desktop/Work/Classifiers/'
     ]
 
     return localPath[userID]

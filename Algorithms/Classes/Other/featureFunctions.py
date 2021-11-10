@@ -1,6 +1,8 @@
 import numpy as np
 import math
 
+from numpy.lib.function_base import append
+
 # Feature Functions
 ##################################
 def mav(bucket):
@@ -58,24 +60,32 @@ def var(bucket):   #Variance of columns in bucket
 
 def stDev(bucket):   #StDev of columns in bucket
     stDevArray = []
-    var = var(bucket)
+    varArray = var(bucket)
 
-    for num in var:
+    for num in varArray:
         stDev = math.sqrt(num)
         stDevArray.append(stDev)
 
     return stDevArray
 
 def AROC(bucket):
-        rise = bucket[len(bucket)-1] - bucket[0]
-        run = len(bucket) - 1
+    slopeArray = []
+    for col in bucket:
+        rise = col[len(col)-1] - col[0]
+        run = len(col) 
         slope = rise/run
-        return slope
+        slopeArray.append(slope)
+    
+    return slopeArray
 
 def integral(bucket): #Uses simpsons method
         sum = 0
-        for i in range(0,len(bucket)):
-            sum += bucket[i]
+        integralArray = []
+        for col in bucket:
+            for row in col:
+                sum += row
+            sum *= (len(col) - 1)
+            integralArray.append(sum)
         
-        return sum*(len(bucket)-1)
+        return integralArray
 ##################################
