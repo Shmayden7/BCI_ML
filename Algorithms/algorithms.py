@@ -32,7 +32,7 @@ def trainRF(instanceArray, numOfTrees):
     return classifier
 
 # Multi-layer Perceptron Classifier 
-def trainMLP(instanceArray):
+def trainMLP(instanceArray, params):
     train_x, train_y = mergeInstanceData(instanceArray)
 
     tic = time.perf_counter()

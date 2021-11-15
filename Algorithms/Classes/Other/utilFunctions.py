@@ -1,24 +1,25 @@
 import time
 
 # Datasets
-set_1_25 = [
-        # 'test_1.csv',
-        # 'test_2.csv',
-        'C-160224.csv',
-        'E-160304.csv',
-        'F-160202.csv',
-        'G-160412.csv',
-        'H-160720.csv',
-        'I-160628.csv',
-        'J-161121.csv',
-        'K-161108.csv',
-        'L-161205.csv',
-        'M-161117.csv',
-    ]
+##################################
+fileName = [
+    'C-160224',
+    'E-160304',
+    'F-160202',
+    'G-160412',
+    'H-160720',
+    'I-160628',
+    'J-161121',
+    'K-161108',
+    'L-161205',
+    'M-161117',
+]
 
 sets = {
-        1: set_1_25
-    }
+    1: 'set_1_25',
+    2: 'set_1_9'
+}
+##################################
 
 # Functions
 def fillBucket(bucketNumber, data):
@@ -33,11 +34,18 @@ def fillBucket(bucketNumber, data):
 
 def getCSVRef(index, userID, divisionID):
     localPath = [
-        '/Users/Ayden/Documents/BCI/ML_Training/selectChannels/',
+        f'/Users/Ayden/Documents/BCI/ML_Training/{sets[divisionID]}/',
         'C:/Users/henrij2/Desktop/Work/Data/ProcessedData/',
     ]
 
-    return (localPath[userID] + sets[divisionID][index])
+    return (localPath[userID] + fileName[index] + '.csv')
+
+def getPKLRef(index, userID, divisionID):
+    localPath = [
+        f'/Users/Ayden/Documents/BCI/ML_Training/{sets[divisionID]}/',
+    ]
+
+    return (localPath[userID] + fileName[index] + '.pkl')
 
 def getClassifierRef(userID):
     localPath = [
