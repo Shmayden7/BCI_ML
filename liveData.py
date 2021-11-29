@@ -1,8 +1,7 @@
 import time
 import numpy as np
 
-from scipy.signal import butter, lfilter
-from scipy import signal
+from scipy.signal import butter, lfilter, welch
 from scipy.integrate import simps
 
 import brainflow
@@ -32,38 +31,21 @@ def bandpass_filter(data, timeWindow, lowcut, highcut, fs, order=5):
 
     return filteredData
 
-alphaPSD = [ [],[],[],[],[],[],[],[] ]
-def alphaPower(filteredData, fs, timeWindow):
-    
-    low, high = 8, 13
-    window = timeWindow 
-    for i in range(0,len(filteredData)):
-        f, psd = signal.welch(filteredData[i],fs, nperseg=window)
-        alphaBand = np.logical_and(f >= low, f <= high)
+def bandpower(data, high_f, low_f, fs, window):
+    nperseg = window * fs
 
-        fRes = f[1] - f[0] 
-    
-        alpha_power = simps(psd[alphaBand], dx=fRes)
-        
-        alphaPSD[i].append(alpha_power)
-    
-    return alphaPSD
+    f ,psd = welch(data, fs, nperseg=nperseg)
 
-betaPSD = [ [],[],[],[],[],[],[],[] ]
-def betaPower(filteredData, fs, timeWindow):
-    low, high = 8, 13
-    window = timeWindow 
-    for i in range(0,len(filteredData)):
-        f, psd = signal.welch(filteredData[i],fs, nperseg=window)
-        betaBand = np.logical_and(f >= low, f <= high)
+    # Frequency resolution
+    fRes = f[1] - f[0]
 
-        fRes = f[1] - f[0] 
-    
-        beta_power = simps(psd[betaBand], dx=fRes)
-        
-        betaPSD[i].append(beta_power)
-    
-    return betaPSD
+    # Defines the band using the low/high frequency 
+    band = np.logical_and(f >= low_f, f <= high_f)
+
+    # Approximates band power
+    bp = simps(psd[band], dx=fRes)
+
+    return bp
 
 def extractFeatures(filteredData):
     featureArray = []
@@ -96,12 +78,12 @@ def main():
     SCALE_FACTOR_EEG = (4500000)/24/(2**23-1) #uV/count
 
     tic = time.perf_counter()
-    timeout = time.time() + 4
+    timeout = time.time() + 5
     x = []
     i = 0
     while True: #len(rawData[0]) < 1000:
         i += 1
-        x.append(i)
+        x.append(i)   
         # data = board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
         data = board.get_current_board_data(1)[eeg_chan]*SCALE_FACTOR_EEG  # get all data and remove it from internal buffer              
         #Filters data based on the last 1000 samples
@@ -115,8 +97,7 @@ def main():
           
 
     toc = time.perf_counter()
-    print(f'Filtered {len(alphaPSD[0])} samples in {toc - tic:0.4}s!')
-    print(alphaPSD[0]) 
+    print(f'Filtered {len(filteredData[0])} samples in {toc - tic:0.4}s!')
     plt.plot(x[0:len(filteredData[0])],filteredData[0])
     plt.show()
         #Parse data so it is organized in column vectors
@@ -124,17 +105,4 @@ def main():
         #apply feature extraction to each column 
 
 if __name__ == "__main__":
-    t = np.arange(0,10,0.1)
-    y = np.sin(t*20)
-
-    f, psd = signal.welch(y , 10)
-    alphaBand = np.logical_and(f >= 8, f <= 13)
-
-    fRes = f[1] - f[0] 
-    print(f)
-    print(psd[alphaBand])
-   
-    #alpha_power = simps(psd[alphaBand], dx=fRes)
-    
-    #plt.plot(x,alpha_power)
-    
+    main()
