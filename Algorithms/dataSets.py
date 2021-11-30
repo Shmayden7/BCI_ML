@@ -1,6 +1,6 @@
 from os import read
 import random
-from .Classes.Other.utilFunctions import sets
+from .Classes.Other.utilFunctions import sets, fileName
 
 from .Classes.TrainingData import TrainingData
 from .Classes.Other.utilFunctions import getCSVRef
@@ -8,9 +8,10 @@ from .Classes.Other.readWrite import readTrainingDataInstance
 
 # Creating Datasets
 ##################################
-def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, startingPoint=0, readPKL=True):
+def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, readPKL=True, startingPoint=0):
     instanceArray = []
-    if numOfFiles <= len(sets[divisionID]):
+
+    if numOfFiles <= len(fileName):
 
         if readPKL: # Reading from the pre-recorded pkl object instances
             print(f"\nCreating a data set from {numOfFiles} PKL files...")
@@ -20,6 +21,8 @@ def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, sta
             print(f"\nCreating a data set from {numOfFiles} CSV files...")
             for x in range(startingPoint, (numOfFiles + startingPoint)):
                 instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, featureID, nullPercentage, readPKL))
+    else:
+        print('\nError! createDataSet failed, numOfFiles > available files')
 
     return instanceArray
 
@@ -30,9 +33,9 @@ def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfFile
     if numOfFiles <= len(sets[divisionID]):
         x = 0
         if readPKL:
-            print(f"\nCreating a data set from {numOfFiles} PKL files...")
+            print(f"\nCreating a random data set from {numOfFiles} PKL files...")
         else: 
-            print(f"\nCreating a data set from {numOfFiles} CSV files...")
+            print(f"\nCreating a random data set from {numOfFiles} CSV files...")
             
         while x < numOfFiles:
             r = random.randint(0, len(sets[divisionID]) - 1)

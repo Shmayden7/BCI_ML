@@ -23,7 +23,11 @@ def trainRF(instanceArray, numOfTrees):
     scaler = StandardScaler()
     normalized_train_x = scaler.fit_transform(train_x)
 
-    classifier = RandomForestClassifier(n_estimators=numOfTrees, random_state=0)
+    classifier = RandomForestClassifier(n_estimators=numOfTrees,max_leaf_nodes=4,
+        bootstrap=True,max_depth=5,min_samples_split=2,
+        min_samples_leaf=4,
+        max_features='auto',random_state=0)
+
     classifier.fit(normalized_train_x, train_y)
 
     toc = time.perf_counter()

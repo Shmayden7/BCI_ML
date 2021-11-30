@@ -14,12 +14,20 @@ def divideBucket(currentBucket, divisionID):
             'betaPower': betaPower,
             'bothPowers': bothPowers
         }
+
+    if divisionID == 2:
+        onlyDivision = currentBucket
+
+        divisions = {
+            'onlyDivision': onlyDivision
+        }
     
     return divisions
 
-def determineFeaturesFromDivision(divisions, featureID):
 
-    if featureID == 1:
+def determineFeaturesFromDivision(divisions, divisionID, featureID):
+
+    if (divisionID == 1 and featureID == 1):
         aveVol = aveOfCol(divisions['eegChannels'])
         mavOfVol = mav(divisions['eegChannels'])
         aveAlphaPower = aveOfCol(divisions['alphaPower'])
@@ -27,11 +35,15 @@ def determineFeaturesFromDivision(divisions, featureID):
         diffOfPower = maxDiff(divisions['bothPowers'])
 
         rowOfFeatures = aveVol + mavOfVol + aveAlphaPower + aveBetaPower + diffOfPower
+
+    if (divisionID == 2 and featureID == 1):
+        rowOfFeatures = divisions['onlyDivision']
         
     return rowOfFeatures
 
+
 def getRowFromBucket(currentBucket, divisionID, featureID):
     divisions = divideBucket(currentBucket, divisionID)
-    rowOfFeatures = determineFeaturesFromDivision(divisions, featureID)
+    rowOfFeatures = determineFeaturesFromDivision(divisions, divisionID, featureID)
     return rowOfFeatures
 

@@ -1,7 +1,9 @@
 import csv
 import time
 import numpy as np
+import pywt
 from scipy.sparse import data
+from scipy.fft import fft
 
 from .Other.determiningFeatures import getRowFromBucket
 from .Other.utilFunctions import fillBucket
@@ -14,10 +16,12 @@ class TrainingData:
     numOfBuckets = 0
     nullPercentage = 0
     data = []
+    # fft = []
+    # wt = []
     ml_X = []
     ml_y = []
-    divisionID = 1
-    featureID = 1 
+    divisionID = 0
+    featureID = 0 
 
     def __init__(self, filePath, divisionID, featureID, nullPercentage = 0.3, numOfBuckets = 0):
         self.filePath = filePath
@@ -33,6 +37,9 @@ class TrainingData:
 
         # fill the data attribute from the .csv file
         self.fillData()
+
+        # determining transform properties
+        # self.calculateTransforms()
 
         # set the total time for the file
         self.setTime()
@@ -78,6 +85,17 @@ class TrainingData:
         print(f'Data has been populated in {toc - tic:0.4}s!')
         self.data = dataHolder
 
+    # def calculateTransforms(self):
+    #     fftArray = []
+        
+    #     for col in range(len(self.data) - 1):
+    #         fftArray.append(np.abs(fft(self.data[col])))
+    #         #cA , cD = pywt.dwt(self.data[col])
+    #         #wt.append(cA)
+    #         #wt.append(cD)
+    #     self.fft = fftArray
+    #     # self.wt = wt
+
     def setTime(self):
         colLength = len(self.data[0])
         self.time = colLength / self.frequency
@@ -102,10 +120,10 @@ class TrainingData:
         numOfZeroes = 0
 
         # Number of full buckets in instance
-        for bucketNum in range(self.numOfBuckets):
+        for bucketNum in range(1):
 
             # Bucketing Data
-            currentBucket = np.array(fillBucket(bucketNum, self.data)) 
+            currentBucket = np.array(fillBucket(bucketNum)) 
 
             # Determining Markers
             markers = currentBucket[len(currentBucket) - 1,:] 
@@ -134,7 +152,5 @@ class TrainingData:
 
         toc = time.perf_counter()
         print(f"{filledBuckets} buckets have been filled in {toc - tic:0.4}s!")
-
         self.ml_X = x
         self.ml_y = y
-

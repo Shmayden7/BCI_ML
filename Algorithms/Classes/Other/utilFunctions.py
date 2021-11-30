@@ -22,14 +22,23 @@ sets = {
 ##################################
 
 # Functions
-def fillBucket(bucketNumber, data):
+def fillBucket(bucketNumber, eeg, fft):
     startingRow = bucketNumber*6
     bucket = []
-    for i in range(len(data)):
+
+    for i in range(len(fft)):
         colVector = []
         for j in range(startingRow, startingRow+6):
-            colVector.append(data[i][j])
+            colVector.append(fft[i][j])
         bucket.append(colVector)
+
+    for i in range(len(eeg)):
+        colVector = []
+        for j in range(startingRow, startingRow+6):
+            colVector.append(eeg[i][j])
+        bucket.append(colVector)
+
+    print(len(bucket))
     return bucket
 
 def getCSVRef(index, userID, divisionID):
