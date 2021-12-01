@@ -3,8 +3,8 @@
 from os import write
 from scipy.sparse import data
 from Algorithms.Classes.TrainingData import TrainingData
-from Algorithms.algorithms import trainMLP, trainRF, trainLDA, trainQDA, testClassifier
-from Algorithms.dataSets import createDataSet, createRandomDataset
+from Algorithms.algorithms import createAndTestAlgorithm
+from Algorithms.dataSets import createDataSet
 from Algorithms.Classes.Other.readWrite import readClassifier, writeClassifier, writeTrainingDataInstance, readTrainingDataInstance
 from Algorithms.testingFeatures import testFeatures
 ##################################
@@ -12,9 +12,9 @@ from Algorithms.testingFeatures import testFeatures
 # Universal Parameters
 ##################################
 userID = 0                       # Ayden: 0, Josh: 1, Ahmad: 2
-numOfTrainingFiles = 2           # Number of CSV's used to create the training dataset
-numOfTestingFiles = 4            # Number of CSV's used to create the testing dataset              
-nullPercentage = 0.1             # Percent of 0's used in the data set    
+numOfTrainingFiles = 5           # Number of CSV's used to create the training dataset
+testSizePercentage = 0.3         # Number of CSV's used to create the testing dataset              
+nullPercentage = 0.05            # Percent of 0's used in the data set    
 ##################################
 
 # LDA
@@ -23,11 +23,13 @@ divisionID_LDA = 1               # Determines which type of CSV files are read a
 featureID_LDA = 1                # Determines which features are applied to a specific division of data
 
 def runLDA():
-    trainingData = createDataSet(userID, divisionID_LDA, featureID_LDA, nullPercentage, numOfTrainingFiles)
-    testingData = createRandomDataset(userID, divisionID_LDA, featureID_LDA, nullPercentage, numOfTestingFiles)
 
-    classifierLDA = trainLDA(trainingData)
-    accuracy = testClassifier(classifierLDA, testingData)
+    params = {
+
+    }
+
+    data = createDataSet(userID, divisionID_LDA, featureID_LDA, nullPercentage, numOfTrainingFiles)
+    classifierLDA, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'LDA', params)
 
     writeClassifier(f'LDA_{divisionID_LDA}_{featureID_LDA}_{accuracy}%.pkl', classifierLDA, userID)
 ##################################
@@ -38,51 +40,56 @@ divisionID_QDA = 1               # Determines which type of CSV files are read a
 featureID_QDA = 1                # Determines which features are applied to a specific division of data 
 
 def runQDA():
-    trainingData = createDataSet(userID, divisionID_QDA, featureID_QDA, nullPercentage, numOfTrainingFiles)
-    testingData = createRandomDataset(userID, divisionID_QDA, featureID_QDA, nullPercentage, numOfTestingFiles)
 
-    classifierQDA = trainQDA(trainingData)
-    accuracy = testClassifier(classifierQDA, testingData)
+    params = {
+
+    }
+
+    data = createDataSet(userID, divisionID_QDA, featureID_QDA, nullPercentage, numOfTrainingFiles)
+    classifierQDA, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'QDA', params)
 
     writeClassifier(f'QDA_{divisionID_QDA}_{featureID_QDA}_{accuracy}%.pkl', classifierQDA, userID)
 ##################################
 
 # RF
 ##################################
-numOfTrees = 300                 # Number of trees used in the random forest          
 divisionID_RF = 1                # Determines which type of CSV files are read and how they're divided
 featureID_RF = 1                 # Determines which features are applied to a specific division of data
 
 def runRF():
-    trainingData = createDataSet(userID, divisionID_RF, featureID_RF, nullPercentage, numOfTrainingFiles)
-    testFeatures(trainingData)
-    # testingData = createRandomDataset(userID, divisionID_RF, featureID_RF, nullPercentage, numOfTestingFiles)
 
-    # classifierRF = trainRF(trainingData, numOfTrees)
-    # accuracy = testClassifier(classifierRF, testingData)
+    params = {
+    'numOfTrees': 200,
+    'bootstrap': True,
+    'max_depth': 10,
+    'n_jobs' : -1,
+    'random_state': 0
+    }
 
-    # writeClassifier(f'RF_{divisionID_RF}_{featureID_RF}_{accuracy}%.pkl', classifierRF, userID)
+    data = createDataSet(userID, divisionID_RF, featureID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
+    classifierRF, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'RF', params)
+
+    writeClassifier(f'RF_{divisionID_RF}_{featureID_RF}_{accuracy}%.pkl', classifierRF, userID)
 ##################################
 
 # MLP
 ##################################
 divisionID_MLP = 1               # Determines which type of CSV files are read and how they're divided
 featureID_MLP = 1                # Determines which features are applied to a specific division of data
-params = {
-    'hidden_layer_sizes': [(50),(100),(100),(50)],    # value is the number of neurons in a layer, length is the number of hidden layers
-    # 'max_iter': 300,                                  # number of times it will run through the training data
-    # 'activation': 'relu',                             # Activation function for each of the hidden layers
-    # 'solver': 'adam',                                 # Activation function for the hidden layers
-    # 'shuffle': True,
-    # 'learning_rate': ,                              # allows you to set a seed for reproducing the same results
-}
 
 def runMLP():
-    trainingData = createDataSet(userID, divisionID_MLP, featureID_MLP, nullPercentage, numOfTrainingFiles, False)
-    testingData = createRandomDataset(userID, divisionID_RF, featureID_RF, nullPercentage, numOfTestingFiles)
+    
+    params = {
+    'hidden_layer_sizes': [(50),(100),(100),(50)],    # value is the number of neurons in a layer, length is the number of hidden layers
+    # 'max_iter': 300,                                # number of times it will run through the training data
+    # 'activation': 'relu',                           # Activation function for each of the hidden layers
+    # 'solver': 'adam',                               # Activation function for the hidden layers
+    # 'shuffle': True,
+    # 'learning_rate': ,                              # allows you to set a seed for reproducing the same results
+    }
 
-    classifierMLP = trainMLP(trainingData, params)
-    accuracy = testClassifier(classifierMLP, testingData)
+    data = createDataSet(userID, divisionID_MLP, featureID_MLP, nullPercentage, numOfTrainingFiles, False)
+    classifierMLP, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'MLP', params)
 
     writeClassifier(f'MLP_{divisionID_MLP}_{featureID_MLP}_{accuracy}%.pkl', classifierMLP, userID)
 ##################################
@@ -90,4 +97,12 @@ def runMLP():
 # Execution Code
 ##################################
 runRF()
+
+# testInstance = TrainingData('/Users/Ayden/Documents/BCI/ML_Training/set_1_9/1.csv', 1,1)
+
+# print(f'\n Length: {len(testInstance.ml_X)}')
+# print(testInstance.ml_X)
+
+# print(f'\n Length: {len(testInstance.ml_y)}')
+# print(testInstance.ml_y)
 ##################################

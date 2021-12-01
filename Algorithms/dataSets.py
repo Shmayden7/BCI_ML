@@ -1,5 +1,6 @@
 from os import read
 import random
+from sklearn.model_selection import train_test_split
 from .Classes.Other.utilFunctions import sets, fileName
 
 from .Classes.TrainingData import TrainingData
@@ -20,7 +21,7 @@ def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, rea
         else: # Reading from the raw csv files
             print(f"\nCreating a data set from {numOfFiles} CSV files...")
             for x in range(startingPoint, (numOfFiles + startingPoint)):
-                instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, featureID, nullPercentage, readPKL))
+                instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, featureID, nullPercentage))
     else:
         print('\nError! createDataSet failed, numOfFiles > available files')
 
@@ -46,12 +47,12 @@ def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfFile
                 if readPKL: # Reading from the pre-recorded pkl object instances
                     instanceArray.append(readTrainingDataInstance(r, userID, divisionID))
                 else: # Reading from the raw csv file
-                    instanceArray.append(TrainingData(getCSVRef(r, userID, divisionID), divisionID, featureID, nullPercentage, readPKL))
+                    instanceArray.append(TrainingData(getCSVRef(r, userID, divisionID), divisionID, featureID, nullPercentage))
 
     return instanceArray
 ##################################
             
-def mergeInstanceData(instanceArray):
+def mergeInstanceData(instanceArray, testSizePercentage):
     final_x = []
     final_y = []
 
@@ -65,6 +66,9 @@ def mergeInstanceData(instanceArray):
         for row in instance.ml_y:
             final_y.append(row)
 
-    print("\nData has been merged!")
+    x_train, x_test, y_train, y_test = train_test_split(final_x, final_y, test_size=testSizePercentage, random_state=42)
+
+    print("\nTrainingData instances have been merged!")
     print(f"Total Data Entries: {len(final_x)}")
-    return final_x, final_y
+
+    return x_train, x_test, y_train, y_test

@@ -1,9 +1,5 @@
 import csv
 import time
-import numpy as np
-import pywt
-from scipy.sparse import data
-from scipy.fft import fft
 
 from .Other.determiningFeatures import getRowFromBucket
 from .Other.utilFunctions import fillBucket
@@ -13,19 +9,15 @@ class TrainingData:
     frequency = 200
     time = 0
     filePath = ''
-    numOfBuckets = 0
     nullPercentage = 0
     data = []
-    # fft = []
-    # wt = []
     ml_X = []
     ml_y = []
     divisionID = 0
     featureID = 0 
 
-    def __init__(self, filePath, divisionID, featureID, nullPercentage = 0.3, numOfBuckets = 0):
+    def __init__(self, filePath, divisionID, featureID, nullPercentage = 0.3):
         self.filePath = filePath
-        self.numOfBuckets = numOfBuckets
         self.nullPercentage = nullPercentage
         self.divisionID = divisionID
         self.featureID = featureID
@@ -38,18 +30,11 @@ class TrainingData:
         # fill the data attribute from the .csv file
         self.fillData()
 
-        # determining transform properties
-        # self.calculateTransforms()
-
         # set the total time for the file
         self.setTime()
 
-        # setting the numOfBuckets optional param
-        self.setNumOfBuckets()
-
         # set ML X matrix and y vector
         self.setMl_XY()
-
 
     def fillData(self):
 
@@ -85,72 +70,47 @@ class TrainingData:
         print(f'Data has been populated in {toc - tic:0.4}s!')
         self.data = dataHolder
 
-    # def calculateTransforms(self):
-    #     fftArray = []
-        
-    #     for col in range(len(self.data) - 1):
-    #         fftArray.append(np.abs(fft(self.data[col])))
-    #         #cA , cD = pywt.dwt(self.data[col])
-    #         #wt.append(cA)
-    #         #wt.append(cD)
-    #     self.fft = fftArray
-    #     # self.wt = wt
-
     def setTime(self):
         colLength = len(self.data[0])
         self.time = colLength / self.frequency
-
-    def setNumOfBuckets(self):
-        if self.numOfBuckets == 0:
-            self.numOfBuckets = len(self.data[0]) // 6
 
     def setMl_XY(self):
 
         x = []
         y = []
 
-        # Structure of x
-        #  [f1_c1,f1_c2...,f2_c1,,,,,] b=1 (training example 1)
-        #  [,,,,,,,] b=2
-        #  [,,,,,,,] b=3
-        #  [,,,,,,,] b=4
         tic = time.perf_counter()
         print("Populating feature matrix & Y vector...")
-        filledBuckets = 0
+        dataRowEntries = 0
         numOfZeroes = 0
 
-        # Number of full buckets in instance
-        for bucketNum in range(1):
+        for row in range(len(self.data[0])):
+            currentRow = []
 
-            # Bucketing Data
-            currentBucket = np.array(fillBucket(bucketNum)) 
+            # Getting the marker
+            currentMarkerValue = self.data[len(self.data)-1][row]
 
-            # Determining Markers
-            markers = currentBucket[len(currentBucket) - 1,:] 
-
-            if len(set(markers)) == 1:
-                # Assigning value in y vector
-                currentMarkerValue = list(set(markers))[0]
-                returnMarkerValue = 0
-
-                # Defining static and movement states (marker value)
-                if currentMarkerValue == 0 or currentMarkerValue == 91 or currentMarkerValue == 92 or currentMarkerValue == 99 or currentMarkerValue == 3 or currentMarkerValue == 5:
+            if currentMarkerValue == 0 or currentMarkerValue == 91 or currentMarkerValue == 92 or currentMarkerValue == 99 or currentMarkerValue == 3 or currentMarkerValue == 5:
                     returnMarkerValue = 0
                     numOfZeroes += 1
-                else: 
-                    returnMarkerValue = currentMarkerValue
+            else: 
+                returnMarkerValue = currentMarkerValue
 
-                #Check if null percentage has been reached
-                if numOfZeroes / self.numOfBuckets >= self.nullPercentage and returnMarkerValue == 0:
-                    continue #skips current iteration
+            #Check if null percentage has been reached
+            if numOfZeroes / len(self.data[0]) >= self.nullPercentage and returnMarkerValue == 0:
+                continue #skips current iteration
+            
+            for col in range(len(self.data) - 1):
+                currentRow.append(self.data[col][row])
+    
+            
+            dataRowEntries += 1 
 
-                rowOfFeatures = getRowFromBucket(currentBucket, self.divisionID, self.featureID)
-
-                x.append(rowOfFeatures)
-                y.append(returnMarkerValue)
-                filledBuckets += 1 
+            # Appending Rows to X matrix and y vector
+            y.append(returnMarkerValue)
+            x.append(currentRow)
 
         toc = time.perf_counter()
-        print(f"{filledBuckets} buckets have been filled in {toc - tic:0.4}s!")
         self.ml_X = x
         self.ml_y = y
+        print(f"{dataRowEntries} Data entries have been filled in {toc - tic:0.4}s!")

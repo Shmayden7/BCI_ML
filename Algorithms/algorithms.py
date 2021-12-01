@@ -2,8 +2,8 @@ import time
 from .dataSets import mergeInstanceData
 
 # Sklearn imports
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import classification_report, accuracy_score
 
 # Importing Classifiers
 from sklearn.ensemble import RandomForestClassifier
@@ -12,103 +12,63 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 
 # Training Classification Algorithms
+##################################
 
-# Random Forest Classifier
-def trainRF(instanceArray, numOfTrees):
-    train_x, train_y = mergeInstanceData(instanceArray)
+def createAndTestAlgorithm(instanceArray,testSizePercentage,algName,params):
+    x_train, x_test, y_train, y_test = mergeInstanceData(instanceArray, testSizePercentage)
 
     tic = time.perf_counter()
     print("\nTraining The RandomForest!")
-   
-    scaler = StandardScaler()
-    normalized_train_x = scaler.fit_transform(train_x)
 
-    classifier = RandomForestClassifier(n_estimators=numOfTrees,max_leaf_nodes=4,
-        bootstrap=True,max_depth=5,min_samples_split=2,
-        min_samples_leaf=4,
-        max_features='auto',random_state=0)
+    # Scale Using MinMaxScaler
+    scaler = MinMaxScaler()
+    normalized_x_train = scaler.fit_transform(x_train)
 
-    classifier.fit(normalized_train_x, train_y)
+    # Creating Classifier
+    if algName == 'RF':
+        classifier = RandomForestClassifier(n_estimators=params['numOfTrees'],
+                bootstrap=params['bootstrap'],max_depth=params['max_depth'],
+                n_jobs=['n_jobs'],random_state=['random_state'])
+    elif algName == 'MLP':
+        classifier = MLPClassifier()
 
-    toc = time.perf_counter()
-    print(f'Built RandomForest in {toc - tic:0.4}s!')
+    elif algName == 'LDA':
+        classifier = LinearDiscriminantAnalysis()
 
-    return classifier
+    elif algName == 'QDA':
+        classifier = QuadraticDiscriminantAnalysis()
 
-# Multi-layer Perceptron Classifier 
-def trainMLP(instanceArray, params):
-    train_x, train_y = mergeInstanceData(instanceArray)
-
-    tic = time.perf_counter()
-    print("\nTraining The MLP!")
-
-    scaler = StandardScaler()
-    normalized_train_x = scaler.fit_transform(train_x)
-
-    classifier = MLPClassifier()
-    classifier.fit(normalized_train_x, train_y)
+    classifier.fit(normalized_x_train, y_train)
 
     toc = time.perf_counter()
-    print(f'Built MLP in {toc - tic:0.4}s!')
+    print(f'Built {algName} in {toc - tic:0.4}s!')
 
-    return classifier
+    accuracy = testClassifier(classifier, x_test, y_test)
 
-# Linear Discriminant Analysis Classifier
-def trainLDA(instanceArray):
-    train_x, train_y = mergeInstanceData(instanceArray)
+    return classifier, accuracy
 
-    tic = time.perf_counter()
-    print("\nTraining The LDA!")
+##################################
 
-    scaler = StandardScaler()
-    normalized_train_x = scaler.fit_transform(train_x)
-
-    classifier = LinearDiscriminantAnalysis()
-    classifier.fit(normalized_train_x, train_y)
-
-    toc = time.perf_counter()
-    print(f'Built LDA in {toc - tic:0.4}s!')
-
-    return classifier
-
-# Quadratic Discriminant Analysis Classifier
-def trainQDA(instanceArray):
-    train_x, train_y = mergeInstanceData(instanceArray)
-
-    tic = time.perf_counter()
-    print("\nTraining The QDA!")
-
-    scaler = StandardScaler()
-    normalized_train_x = scaler.fit_transform(train_x)
-
-    classifier = QuadraticDiscriminantAnalysis()
-    classifier.fit(normalized_train_x, train_y)
-
-    toc = time.perf_counter()
-    print(f'Built QDA in {toc - tic:0.4}s!')
-
-    return classifier
-
-def testClassifier(classifier, instanceArray):
-    test_x, test_y = mergeInstanceData(instanceArray)
+def testClassifier(classifier, x_test, y_test):
 
     tic = time.perf_counter()
     print('\nTesting the Classifier!')
 
-    scaler = StandardScaler()
-    normalized_test_x = scaler.fit_transform(test_x)
+    # Scale Using MinMaxScaler
+    scaler = MinMaxScaler()
+    normalized_x_test = scaler.fit_transform(x_test)
 
-    y_pred = classifier.predict(normalized_test_x)
+    y_pred = classifier.predict(normalized_x_test)
     toc = time.perf_counter()
 
-    accuracyScore = accuracy_score(test_y, y_pred)
+    #accuracyScore = accuracy_score(y_test, y_pred)
+    accuracyScore = classifier.score(x_test, y_test)
     percentage = int(round((accuracyScore*100),0))
 
     print(f'Classifier was built & tested in {toc - tic:0.4}s!')
 
-    #print(confusion_matrix(y_test, y_pred))
-    print(classification_report(test_y, y_pred))
-    print('Accuracy score:' + str(accuracyScore))
+    print(classification_report(y_test, y_pred))
+    print('Accuracy score: ' + str(accuracyScore))
 
     return percentage
     
