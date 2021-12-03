@@ -100,6 +100,34 @@ class TrainingData:
         tic = time.perf_counter()
         print("Populating feature matrix & Y vector...")
 
+        # Appending Bandpower
+        # [[8_eeg],[y],[a_power]
+
+        # 1 1 1 1 1 1 1 1 y a
+        # 1 1 1 1 1 1 1 1 y a
+        # 1 1 1 1 1 1 1 1 y a
+        # 1 1 1 1 1 1 1 1 y 
+        # 1 1 1 1 1 1 1 1 y 
+        # 1 1 1 1 1 1 1 1 y
+        # 1 1 1 1 1 1 1 1 y
+
+        # Appending Power to the end of Data  
+        for col in range(len(self.data) - 1):
+            bpCol = []
+            for row in range(2,len(self.data[col])):
+                if row < self.frequency*timeFrame:
+                    start = 0
+                    end = row
+                else:
+                    start = row - self.frequency*timeFrame
+                    end = row
+                bpCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
+            self.data.append(bpCol)
+        print(len(self.data))      
+
+        # Move Y col from middle to end of self.data
+
+        # Removing Null Percentage
         for row in range(len(self.data[0])):
             currentRow = []
 
@@ -125,22 +153,8 @@ class TrainingData:
             y.append(returnMarkerValue)
             x.append(currentRow)
 
-        # Adding power values to each row in x matrix
-        for row in range(len(self.data[0])):
-            dataChunk = []
-            for col in range(len(self.data)):
-                if row > timeFrame*self.frequency:
-                    start = row - (timeFrame*self.frequency)
-                    end = row
-                else:
-                    start = 0
-                    end = row    
-
-                dataChunk.append(self.data[col][start:end])
-                    
-            x[row] = x[row] + bandPower(dataChunk, 'alpha', self.frequency, 30)
-
         toc = time.perf_counter()
         self.ml_X = x
         self.ml_y = y
+        print(len(self.ml_x[0]))
         print(f"{dataRowEntries} Data entries have been filled in {toc - tic:0.4}s!")

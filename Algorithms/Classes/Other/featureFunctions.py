@@ -93,7 +93,7 @@ def integral(bucket): # Uses simpsons method
         return integralArray
 ##################################
 
-# BandPower of a 2-D array over time frame
+# BandPower of a 2-D array over time frame, 2D by Col
 ##################################
 def bandPower(data, band, sampleFreq, timeFrame):
     bpArray = []
@@ -122,20 +122,20 @@ def bandPower(data, band, sampleFreq, timeFrame):
         }
     }
 
-    for col in data:
-        f ,psd = welch(col, sampleFreq, nperseg=nperseg)
+    
+    f ,psd = welch(data, sampleFreq, nperseg=nperseg)
 
-        # Frequency resolution
-        fRes = f[1] - f[0]
+    # Frequency resolution
+    fRes = f[1] - f[0]
 
-        # Defines the band using the low/high frequency 
-        band = np.logical_and(f >= bands[band]['low_f'], f <= bands[band]['high_f'])
+    # Defines the band using the low/high frequency 
+    band = np.logical_and(f >= bands[band]['low_f'], f <= bands[band]['high_f'])
 
-        # Approximates band power
-        bp = simps(psd[band], dx=fRes)
+    # Approximates band power
+    bp = simps(psd[band], dx=fRes)
 
-        bpArray.append(bp)
+    bpArray.append(bp)
 
     #Returns bandpowers of each channel in a row vector
-    return bpArray  # 1D Feature Vector
+    return bp  # returns bandpower
 ##################################
