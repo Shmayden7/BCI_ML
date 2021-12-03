@@ -1,7 +1,11 @@
+# imports 
+##################################
 import numpy as np
 import math
 
-from numpy.lib.function_base import append
+from scipy.integrate import simps
+from scipy.signal import welch
+##################################
 
 # Feature Functions
 ##################################
@@ -40,7 +44,6 @@ def maxDiff(bucket):
 
 ##################################
 
-
 # Random Math Functions
 ##################################
 def var(bucket):   #Variance of columns in bucket
@@ -78,7 +81,7 @@ def AROC(bucket):
     
     return slopeArray
 
-def integral(bucket): #Uses simpsons method
+def integral(bucket): # Uses simpsons method
         sum = 0
         integralArray = []
         for col in bucket:
@@ -88,4 +91,51 @@ def integral(bucket): #Uses simpsons method
             integralArray.append(sum)
         
         return integralArray
+##################################
+
+# BandPower of a 2-D array over time frame
+##################################
+def bandPower(data, band, sampleFreq, timeFrame):
+    bpArray = []
+    nperseg = timeFrame * sampleFreq
+
+    bands = {
+        'delta': {
+            'low_f': 0.5,
+            'high_f': 4
+        },
+        'theta': {
+            'low_f': 4,
+            'high_f': 8
+        },
+        'alpha': {
+            'low_f': 8,
+            'high_f': 13
+        },
+        'beta': {
+            'low_f': 13,
+            'high_f': 30
+        },
+        'gamma': {
+            'low_f': 30,
+            'high_f': 100
+        }
+    }
+
+    for col in data:
+        f ,psd = welch(col, sampleFreq, nperseg=nperseg)
+
+        # Frequency resolution
+        fRes = f[1] - f[0]
+
+        # Defines the band using the low/high frequency 
+        band = np.logical_and(f >= bands[band]['low_f'], f <= bands[band]['high_f'])
+
+        # Approximates band power
+        bp = simps(psd[band], dx=fRes)
+
+        bpArray.append(bp)
+
+    #Returns bandpowers of each channel in a row vector
+    return bpArray  # 1D Feature Vector
 ##################################

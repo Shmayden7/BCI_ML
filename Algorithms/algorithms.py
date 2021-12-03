@@ -28,7 +28,7 @@ def createAndTestAlgorithm(instanceArray,testSizePercentage,algName,params):
     if algName == 'RF':
         classifier = RandomForestClassifier(n_estimators=params['numOfTrees'],
                 bootstrap=params['bootstrap'],max_depth=params['max_depth'],
-                n_jobs=['n_jobs'],random_state=['random_state'])
+                n_jobs=params['n_jobs'],random_state=params['random_state'])
     elif algName == 'MLP':
         classifier = MLPClassifier()
 

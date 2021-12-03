@@ -1,8 +1,5 @@
 # Imports
 ##################################
-from os import write
-from scipy.sparse import data
-from Algorithms.Classes.TrainingData import TrainingData
 from Algorithms.algorithms import createAndTestAlgorithm
 from Algorithms.dataSets import createDataSet
 from Algorithms.Classes.Other.readWrite import readClassifier, writeClassifier, writeTrainingDataInstance, readTrainingDataInstance
@@ -12,7 +9,7 @@ from Algorithms.testingFeatures import testFeatures
 # Universal Parameters
 ##################################
 userID = 0                       # Ayden: 0, Josh: 1, Ahmad: 2
-numOfTrainingFiles = 5           # Number of CSV's used to create the training dataset
+numOfTrainingFiles = 1           # Number of CSV's used to create the training dataset
 testSizePercentage = 0.3         # Number of CSV's used to create the testing dataset              
 nullPercentage = 0.05            # Percent of 0's used in the data set    
 ##################################
@@ -97,12 +94,4 @@ def runMLP():
 # Execution Code
 ##################################
 runRF()
-
-# testInstance = TrainingData('/Users/Ayden/Documents/BCI/ML_Training/set_1_9/1.csv', 1,1)
-
-# print(f'\n Length: {len(testInstance.ml_X)}')
-# print(testInstance.ml_X)
-
-# print(f'\n Length: {len(testInstance.ml_y)}')
-# print(testInstance.ml_y)
 ##################################

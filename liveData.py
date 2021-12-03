@@ -16,8 +16,8 @@ from .preProcessing import bandpassFilter, bandPower, extractFeatures
 def main():
     # Bandpass Filter Variables
     sampleFreq = 250
-    lowcut = 8.0
-    highcut = 30.0
+    lowCut = 8.0
+    highCut = 30.0
     order = 5
     timeFrame = 25 # Window of time where samples of data are used to calculate features
 
@@ -45,7 +45,8 @@ def main():
 
     x = []
     i = 0 # Used for plotting
-    while True: #len(rawData[0]) < 1000: breaks after 5s
+    filteredData=[[],[],[],[],[],[],[],[]] 
+    while time.time() < timeout: 
         i += 1
         x.append(i)   
 
@@ -53,9 +54,10 @@ def main():
         liveData = board.get_current_board_data(1)[eeg_chan]*SCALE_FACTOR_EEG    
 
         #Filters data based on timeFrame seconds
-        filteredData = bandpassFilter(liveData, timeFrame, lowcut, highcut, sampleFreq, order)
+
+        filteredData = bandpassFilter(liveData, timeFrame, lowCut, highCut, sampleFreq, order)
         
-        if len(filteredData[0]) % 6 == 0:
+        # if len(filteredData[0]) % 6 == 0:
 
         # Bucketing our Data
 
@@ -63,9 +65,6 @@ def main():
         # Create Feature Row
         # [raw_1, raw_1, bp_1, bp_2, ]
         
-    
-        if time.time() > timeout:
-            break 
           
 
     toc = time.perf_counter()

@@ -1,8 +1,14 @@
+# imports 
+##################################
 import csv
 import time
 
+from scipy.sparse import data
+
 from .Other.determiningFeatures import getRowFromBucket
-from .Other.utilFunctions import fillBucket
+from .Other.preProcessing import bandpassFilter
+from .Other.featureFunctions import bandPower
+##################################
 
 class TrainingData:
 
@@ -39,6 +45,7 @@ class TrainingData:
     def fillData(self):
 
         dataHolder = []
+        filteredData = []
         print(f"\nPopulating data from: {self.filePath[-12:-4]}...")
 
         tic = time.perf_counter()
@@ -55,7 +62,7 @@ class TrainingData:
                 for colIndex in range(len(row)): # indices of each row 
 
                     if rowIndex == 0:
-                        dataHolder.append([])
+                        dataHolder.append([]) # Appends empty col based on number of cols in csv
 
                     string = row[colIndex] # Voltage as a string
                     double = float(string) # convert string -> double 
@@ -65,10 +72,18 @@ class TrainingData:
 
                     dataHolder[colIndex].append(double)
                     colIndex += 1
+        
+        # Filtering each col of the data, not markers
+        for col in range(len(dataHolder) - 1):
+            filteredCol = bandpassFilter(dataHolder[col], sampleFreq=200, liveData=False)
+            filteredData.append(filteredCol)
+        
+        # Adding markers to filteredData
+        filteredData.append(dataHolder[len(dataHolder)-1])
 
         toc = time.perf_counter()
         print(f'Data has been populated in {toc - tic:0.4}s!')
-        self.data = dataHolder
+        self.data = filteredData
 
     def setTime(self):
         colLength = len(self.data[0])
@@ -78,11 +93,12 @@ class TrainingData:
 
         x = []
         y = []
+        dataRowEntries = 0
+        numOfZeroes = 0
+        timeFrame = 30 
 
         tic = time.perf_counter()
         print("Populating feature matrix & Y vector...")
-        dataRowEntries = 0
-        numOfZeroes = 0
 
         for row in range(len(self.data[0])):
             currentRow = []
@@ -102,13 +118,27 @@ class TrainingData:
             
             for col in range(len(self.data) - 1):
                 currentRow.append(self.data[col][row])
-    
-            
+
             dataRowEntries += 1 
 
             # Appending Rows to X matrix and y vector
             y.append(returnMarkerValue)
             x.append(currentRow)
+
+        # Adding power values to each row in x matrix
+        for row in range(len(self.data[0])):
+            dataChunk = []
+            for col in range(len(self.data)):
+                if row > timeFrame*self.frequency:
+                    start = row - (timeFrame*self.frequency)
+                    end = row
+                else:
+                    start = 0
+                    end = row    
+
+                dataChunk.append(self.data[col][start:end])
+                    
+            x[row] = x[row] + bandPower(dataChunk, 'alpha', self.frequency, 30)
 
         toc = time.perf_counter()
         self.ml_X = x
