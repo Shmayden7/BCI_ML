@@ -100,10 +100,6 @@ def bandPower(data, band, sampleFreq, timeFrame):
     nperseg = timeFrame * sampleFreq
 
     bands = {
-        'delta': {
-            'low_f': 0.5,
-            'high_f': 4
-        },
         'theta': {
             'low_f': 4,
             'high_f': 8
@@ -133,8 +129,6 @@ def bandPower(data, band, sampleFreq, timeFrame):
 
     # Approximates band power
     bp = simps(psd[band], dx=fRes)
-
-    bpArray.append(bp)
 
     #Returns bandpowers of each channel in a row vector
     return bp  # returns bandpower

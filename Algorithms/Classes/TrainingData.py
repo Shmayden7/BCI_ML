@@ -96,37 +96,37 @@ class TrainingData:
         dataRowEntries = 0
         numOfZeroes = 0
         timeFrame = 30 
+        bandPowerStartingPoint = timeFrame*self.frequency
 
         tic = time.perf_counter()
         print("Populating feature matrix & Y vector...")
 
-        # Appending Bandpower
-        # [[8_eeg],[y],[a_power]
-
-        # 1 1 1 1 1 1 1 1 y a
-        # 1 1 1 1 1 1 1 1 y a
-        # 1 1 1 1 1 1 1 1 y a
-        # 1 1 1 1 1 1 1 1 y 
-        # 1 1 1 1 1 1 1 1 y 
-        # 1 1 1 1 1 1 1 1 y
-        # 1 1 1 1 1 1 1 1 y
-
         # Appending Power to the end of Data  
-        for col in range(len(self.data) - 1):
-            bpCol = []
-            for row in range(2,len(self.data[col])):
+        totalColumns = len(self.data) # we need this since self.data is being updated
+        for col in range(totalColumns - 1):
+            print(f'Current Col: {col}')
+            alphaCol = []
+            betaCol = []
+            for row in range(bandPowerStartingPoint,len(self.data[col])):
+                print(f'Current Row: {row}')
                 if row < self.frequency*timeFrame:
                     start = 0
                     end = row
                 else:
                     start = row - self.frequency*timeFrame
                     end = row
-                bpCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
-            self.data.append(bpCol)
-        print(len(self.data))      
+                alphaCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
+                betaCol.append(bandPower(self.data[col][start:end], 'beta', self.frequency, timeFrame))
+            self.data.append(alphaCol)
+            self.data.append(betaCol)
+            # Get rid of first 30 secs of data in channel column
+            self.data[col] = self.data[col][bandPowerStartingPoint:]
 
         # Move Y col from middle to end of self.data
-
+        tempCol = self.data[8]
+        self.data.remove(self.data[8])
+        self.data.append(tempCol)
+    
         # Removing Null Percentage
         for row in range(len(self.data[0])):
             currentRow = []
