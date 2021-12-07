@@ -2,6 +2,7 @@
 ##################################
 import numpy as np
 import math
+import pywt
 
 from scipy.integrate import simps
 from scipy.signal import welch
@@ -93,10 +94,9 @@ def integral(bucket): # Uses simpsons method
         return integralArray
 ##################################
 
-# BandPower of a 2-D array over time frame, 2D by Col
+# BandPower of a column over time frame, 2D by Col
 ##################################
 def bandPower(data, band, sampleFreq, timeFrame):
-    bpArray = []
     nperseg = timeFrame * sampleFreq
 
     bands = {
@@ -132,4 +132,31 @@ def bandPower(data, band, sampleFreq, timeFrame):
 
     #Returns bandpowers of each channel in a row vector
     return bp  # returns bandpower
+##################################
+
+# Wavelet Transform takes in a column, returns a single val
+##################################
+def waveletTransformProps(data):
+    coefficientArray = []
+    # cA = Low Frequency Info, cD = High Frequency Info
+    cA, cD = pywt.dwt(data, 'db1')
+    
+    props = {
+        'cA': {
+            'max': np.max(cA),
+            'min': np.min(cA) ,
+            'mean': np.mean(cA),
+            'median': np.median(cA),
+            'stDev': np.std(cA), 
+        },
+        'cD': {
+            'max': np.max(cD),
+            'min': np.min(cD) ,
+            'mean': np.mean(cD),
+            'median': np.median(cD),
+            'stDev': np.std(cD), 
+        }
+    }
+
+    return props
 ##################################

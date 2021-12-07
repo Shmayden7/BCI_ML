@@ -7,7 +7,7 @@ from scipy.sparse import data
 
 from .Other.determiningFeatures import getRowFromBucket
 from .Other.preProcessing import bandpassFilter
-from .Other.featureFunctions import bandPower
+from .Other.featureFunctions import bandPower, waveletTransformProps
 ##################################
 
 class TrainingData:
@@ -20,13 +20,11 @@ class TrainingData:
     ml_X = []
     ml_y = []
     divisionID = 0
-    featureID = 0 
 
-    def __init__(self, filePath, divisionID, featureID, nullPercentage = 0.3):
+    def __init__(self, filePath, divisionID, nullPercentage = 0.3):
         self.filePath = filePath
         self.nullPercentage = nullPercentage
         self.divisionID = divisionID
-        self.featureID = featureID
 
         # Updating frequency for high frequency files
         lastLetters = filePath[-9:-4]
@@ -96,37 +94,77 @@ class TrainingData:
         dataRowEntries = 0
         numOfZeroes = 0
         timeFrame = 30 
-        bandPowerStartingPoint = timeFrame*self.frequency
+        window = timeFrame*self.frequency
 
         tic = time.perf_counter()
         print("Populating feature matrix & Y vector...")
 
+        # print(f'Length of C1 Before: {len(self.data[0])}')
+        # print(f'Length of Markers Before: {len(self.data[len(self.data) - 1])}')
+        # print(f'First C1 Val Before: {self.data[0][0]}')
+
         # Appending Power to the end of Data  
         totalColumns = len(self.data) # we need this since self.data is being updated
         for col in range(totalColumns - 1):
-            print(f'Current Col: {col}')
-            alphaCol = []
-            betaCol = []
-            for row in range(bandPowerStartingPoint,len(self.data[col])):
-                print(f'Current Row: {row}')
-                if row < self.frequency*timeFrame:
+            alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev = [],[],[],[],[],[],[],[],[],[],[],[]
+            # for row in range(window,len(self.data[col])):
+            for row in range(window, window + 100): # TESTING
+                if row < window:
                     start = 0
                     end = row
                 else:
-                    start = row - self.frequency*timeFrame
+                    start = row - window
                     end = row
+
+                # Adding features to the ml_X and ml_y attributes
                 alphaCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
                 betaCol.append(bandPower(self.data[col][start:end], 'beta', self.frequency, timeFrame))
+                
+                props = waveletTransformProps(self.data[col][start:end])
+
+                cA_max.append(props['cA']['max'])
+                cA_min.append(props['cA']['min'])
+                cA_mean.append(props['cA']['mean'])
+                cA_median.append(props['cA']['median'])
+                cA_stDev.append(props['cA']['stDev'])
+
+                cD_max.append(props['cD']['max'])
+                cD_min.append(props['cD']['min'])
+                cD_mean.append(props['cD']['mean'])
+                cD_median.append(props['cD']['median'])
+                cD_stDev.append(props['cD']['stDev'])
+
+            # Appending columns to data attribute
             self.data.append(alphaCol)
             self.data.append(betaCol)
-            # Get rid of first 30 secs of data in channel column
-            self.data[col] = self.data[col][bandPowerStartingPoint:]
+
+            self.data.append(cA_max)
+            self.data.append(cA_min)
+            self.data.append(cA_mean)
+            self.data.append(cA_median)
+            self.data.append(cA_stDev)
+            
+            self.data.append(cD_max)
+            self.data.append(cD_min)
+            self.data.append(cD_mean)
+            self.data.append(cD_median)
+            self.data.append(cD_stDev)
+
+            # Removing the top rows of eeg data for each channel, 'window' long
+            self.data[col] = self.data[col][window:]
 
         # Move Y col from middle to end of self.data
         tempCol = self.data[8]
-        self.data.remove(self.data[8])
+        self.data.pop(8)
         self.data.append(tempCol)
-    
+
+        # Removing the top rows of 'window' length from marker col
+        self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:]
+
+        # print(f'Length of C1 After: {len(self.data[0])}')
+        # print(f'Length of Markers After: {len(self.data[len(self.data) - 1])}')
+        # print(f'First C1 Val After: {self.data[0][0]}')
+
         # Removing Null Percentage
         for row in range(len(self.data[0])):
             currentRow = []

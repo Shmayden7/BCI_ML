@@ -9,7 +9,7 @@ from .Classes.Other.readWrite import readTrainingDataInstance
 
 # Creating Datasets
 ##################################
-def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, readPKL=True, startingPoint=0):
+def createDataSet(userID, divisionID, nullPercentage, numOfFiles, readPKL=True, startingPoint=0):
     instanceArray = []
 
     if numOfFiles <= len(fileName):
@@ -21,7 +21,7 @@ def createDataSet(userID, divisionID, featureID, nullPercentage, numOfFiles, rea
         else: # Reading from the raw csv files
             print(f"\nCreating a data set from {numOfFiles} CSV files...")
             for x in range(startingPoint, (numOfFiles + startingPoint)):
-                instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, featureID, nullPercentage))
+                instanceArray.append(TrainingData(getCSVRef(x,userID,divisionID), divisionID, nullPercentage))
     else:
         print('\nError! createDataSet failed, numOfFiles > available files')
 

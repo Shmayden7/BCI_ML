@@ -35,7 +35,7 @@ def bandpassFilter(data, lowcut=8, highcut=30, timeFrame = 30, sampleFreq=250, l
 
     return filteredData # Same size as incoming filteredData
 
-def waveletTransform(filteredData):
+def waveletTransformLive(filteredData):
     coefficientArray = []
     for col in filteredData:
         cA, cD = pywt.dwt(col, 'db1')

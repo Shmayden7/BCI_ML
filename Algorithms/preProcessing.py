@@ -13,7 +13,7 @@ rawData=[[],[],[],[],[],[],[],[]]        #
 filteredData=[[],[],[],[],[],[],[],[]]   #
 
 # BandPass Filters 
-def bandpassFilter(data, timeFrame, lowcut, highcut, sampleFreq, order=5):
+def bandpassFilter(data, timeFrame, lowcut, highcut, sampleFreq, order=6):
     nyq =  sampleFreq
     low = lowcut / nyq
     high = highcut / nyq

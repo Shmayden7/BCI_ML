@@ -16,8 +16,8 @@ from .preProcessing import bandpassFilter, bandPower, extractFeatures
 def main():
     # Bandpass Filter Variables
     sampleFreq = 250
-    lowCut = 8.0
-    highCut = 30.0
+    lowCut = 5.0
+    highCut = 33.0
     order = 5
     timeFrame = 25 # Window of time where samples of data are used to calculate features
 
