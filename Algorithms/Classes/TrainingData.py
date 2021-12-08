@@ -93,10 +93,10 @@ class TrainingData:
         y = []
         dataRowEntries = 0
         numOfZeroes = 0
-        timeFrame = 30 
-        window = timeFrame*self.frequency
+        timeFrame = 10
+        window = timeFrame * self.frequency
 
-        tic = time.perf_counter()
+        tic1 = time.perf_counter()
         print("Populating feature matrix & Y vector...")
 
         # print(f'Length of C1 Before: {len(self.data[0])}')
@@ -106,9 +106,13 @@ class TrainingData:
         # Appending Power to the end of Data  
         totalColumns = len(self.data) # we need this since self.data is being updated
         for col in range(totalColumns - 1):
+            tic2 = time.perf_counter()
+            print(f'Current Col: {col}')
             alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev = [],[],[],[],[],[],[],[],[],[],[],[]
-            # for row in range(window,len(self.data[col])):
-            for row in range(window, window + 100): # TESTING
+            for row in range(window,len(self.data[col])):
+            # for row in range(window, window + 100): # TESTING
+                if (row % 100000) == 0: 
+                    print(f'Current Row: {row}')
                 if row < window:
                     start = 0
                     end = row
@@ -153,6 +157,13 @@ class TrainingData:
             # Removing the top rows of eeg data for each channel, 'window' long
             self.data[col] = self.data[col][window:]
 
+            toc2 = time.perf_counter()
+            print(f'Column {col} filled in {toc2 - tic2:0.4}s')
+
+            print(f'Number of Entries in column {col}: {len(self.data[col])}')
+            print(f'Total Number of Columns: {len(self.data)}')
+
+
         # Move Y col from middle to end of self.data
         tempCol = self.data[8]
         self.data.pop(8)
@@ -161,9 +172,9 @@ class TrainingData:
         # Removing the top rows of 'window' length from marker col
         self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:]
 
-        # print(f'Length of C1 After: {len(self.data[0])}')
-        # print(f'Length of Markers After: {len(self.data[len(self.data) - 1])}')
-        # print(f'First C1 Val After: {self.data[0][0]}')
+        print(f'Length of C1 After: {len(self.data[0])}')
+        print(f'Length of Markers After: {len(self.data[len(self.data) - 1])}')
+        print(f'Length of Last Feature Channel After: {len(self.data[len(self.data) - 2])}')
 
         # Removing Null Percentage
         for row in range(len(self.data[0])):
@@ -191,8 +202,10 @@ class TrainingData:
             y.append(returnMarkerValue)
             x.append(currentRow)
 
-        toc = time.perf_counter()
+        toc1 = time.perf_counter()
         self.ml_X = x
         self.ml_y = y
-        print(len(self.ml_x[0]))
-        print(f"{dataRowEntries} Data entries have been filled in {toc - tic:0.4}s!")
+        print(f'Num of Rows in ml_X: {len(self.ml_X)}')
+        print(f'Num of Cols in ml_x: {len(self.ml_X[0])}')
+        print(f'Num of Rows in ml_y: {len(self.ml_y)}')
+        print(f"{dataRowEntries} Data entries have been filled in {toc1 - tic1:0.4}s!")

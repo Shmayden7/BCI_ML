@@ -13,10 +13,10 @@ import numpy as np
 
 # Universal Parameters
 ##################################
-userID = 0                       # Ayden: 0, Josh: 1, Ahmad: 2
-numOfTrainingFiles = 10           # Number of CSV's used to create the training dataset
-testSizePercentage = 0.3         # Number of CSV's used to create the testing dataset              
-nullPercentage = 0.05            # Percent of 0's used in the data set    
+userID = 1                     # Ayden: 0, Josh: 1, Ahmad: 2
+numOfTrainingFiles = 1         # Number of CSV's used to create the training dataset
+testSizePercentage = 0.3       # Number of CSV's used to create the testing dataset              
+nullPercentage = 0.05          # Percent of 0's used in the data set    
 ##################################
 
 # LDA
@@ -96,4 +96,4 @@ def runMLP():
 ##################################
 data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
 writeTrainingDataInstance(data)
-##################################
+################################## c 
