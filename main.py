@@ -1,5 +1,6 @@
 # Imports
 ##################################
+from Algorithms.Classes.Other.utilFunctions import getPKLRef
 from Algorithms.algorithms import createAndTestAlgorithm
 from Algorithms.dataSets import createDataSet
 from Algorithms.Classes.Other.readWrite import readClassifier, writeClassifier, writeTrainingDataInstance, readTrainingDataInstance
@@ -13,8 +14,8 @@ import numpy as np
 
 # Universal Parameters
 ##################################
-userID = 1                     # Ayden: 0, Josh: 1, Ahmad: 2
-numOfTrainingFiles = 1         # Number of CSV's used to create the training dataset
+userID = 1                     # Josh: 1, Ahmad: 2, #Eryn: 3, Sejune: 4
+numOfTrainingFiles = 10         # Number of CSV's used to create the training dataset
 testSizePercentage = 0.3       # Number of CSV's used to create the testing dataset              
 nullPercentage = 0.05          # Percent of 0's used in the data set    
 ##################################
@@ -58,16 +59,15 @@ divisionID_RF = 2                # Determines which type of CSV files are read a
 def runRF():
 
     params = {
-    'numOfTrees': 200,
+    'numOfTrees': 300,
     'bootstrap': True,
-    'max_depth': 10,
+    'max_depth': 15,
     'n_jobs' : -1,
     'random_state': 0
     }
-
-    data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
+    data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles)   
     classifierRF, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'RF', params)
-
+    
     writeClassifier(f'RF_{divisionID_RF}_{accuracy}%.pkl', classifierRF, userID)
 ##################################
 
@@ -86,7 +86,8 @@ def runMLP():
     # 'learning_rate': ,                              # allows you to set a seed for reproducing the same results
     }
 
-    data = createDataSet(userID, divisionID_MLP, nullPercentage, numOfTrainingFiles, False)
+    data = createDataSet(userID, divisionID_MLP, nullPercentage, numOfTrainingFiles)
+ 
     classifierMLP, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'MLP', params)
 
     writeClassifier(f'MLP_{divisionID_MLP}_{accuracy}%.pkl', classifierMLP, userID)
@@ -94,6 +95,8 @@ def runMLP():
 
 # Execution Code
 ##################################
-data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
-writeTrainingDataInstance(data)
-################################## c 
+#data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
+#writeTrainingDataInstance(data)
+runRF()
+
+################################## 

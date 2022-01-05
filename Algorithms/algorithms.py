@@ -18,7 +18,7 @@ def createAndTestAlgorithm(instanceArray,testSizePercentage,algName,params):
     x_train, x_test, y_train, y_test = mergeInstanceData(instanceArray, testSizePercentage)
 
     tic = time.perf_counter()
-    print("\nTraining The RandomForest!")
+    print(f"\nTraining The {algName}!")
 
     # Scale Using MinMaxScaler
     scaler = MinMaxScaler()
@@ -62,7 +62,7 @@ def testClassifier(classifier, x_test, y_test):
     toc = time.perf_counter()
 
     #accuracyScore = accuracy_score(y_test, y_pred)
-    accuracyScore = classifier.score(x_test, y_test)
+    accuracyScore = classifier.score(normalized_x_test, y_test)
     percentage = int(round((accuracyScore*100),0))
 
     print(f'Classifier was built & tested in {toc - tic:0.4}s!')

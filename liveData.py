@@ -10,7 +10,8 @@ from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 
 #Relative Functions
-from .preProcessing import bandpassFilter, bandPower, extractFeatures
+from Algorithms.preProcessing import bandpassFilter
+from Algorithms.Classes.Other.featureFunctions import bandPower, waveletTransformProps
 ##################################
 
 def main():
