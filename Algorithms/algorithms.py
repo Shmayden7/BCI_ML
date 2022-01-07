@@ -11,6 +11,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 
+from Classes.Other.readWrite import readClassifier
 # Training Classification Algorithms
 ##################################
 
@@ -71,5 +72,12 @@ def testClassifier(classifier, x_test, y_test):
     print('Accuracy score: ' + str(accuracyScore))
 
     return percentage
+    
+def testClassifierOnNewData(classifierName, data, userID):
+    classifier = readClassifier('RF_2_88%.pkl',1)
+    x_test = data.ml_X
+    y_test = data.ml_y
+    testClassifier(classifier,x_test,y_test)
+
     
     

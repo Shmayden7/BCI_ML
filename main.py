@@ -6,16 +6,13 @@ from Algorithms.dataSets import createDataSet
 from Algorithms.Classes.Other.readWrite import readClassifier, writeClassifier, writeTrainingDataInstance, readTrainingDataInstance
 from Algorithms.testingFeatures import testFeatures
 
-#testing
-from Algorithms.Classes.Other.featureFunctions import waveletTransformProps
-
 import numpy as np
-##################################
+################################## 
 
 # Universal Parameters
 ##################################
 userID = 1                     # Josh: 1, Ahmad: 2, #Eryn: 3, Sejune: 4
-numOfTrainingFiles = 10         # Number of CSV's used to create the training dataset
+numOfTrainingFiles = 1         # Number of CSV's used to create the training dataset
 testSizePercentage = 0.3       # Number of CSV's used to create the testing dataset              
 nullPercentage = 0.05          # Percent of 0's used in the data set    
 ##################################
@@ -61,7 +58,7 @@ def runRF():
     params = {
     'numOfTrees': 300,
     'bootstrap': True,
-    'max_depth': 15,
+    'max_depth': 10,
     'n_jobs' : -1,
     'random_state': 0
     }
@@ -95,8 +92,14 @@ def runMLP():
 
 # Execution Code
 ##################################
-#data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False)
-#writeTrainingDataInstance(data)
-runRF()
+from Algorithms.Classes.Other.readWrite import readClassifier
+from Algorithms.algorithms import testClassifier
+
+data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False) #Creates instance for csv file
+writeTrainingDataInstance(data) #Write instance to pkl
+classifier = readClassifier('RF_2_88%.pkl',1)
+x_test = data.ml_X
+y_test = data.ml_y
+testClassifier(classifier,x_test,y_test)
 
 ################################## 

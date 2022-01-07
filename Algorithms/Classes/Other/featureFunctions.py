@@ -137,7 +137,6 @@ def bandPower(data, band, sampleFreq, timeFrame):
 # Wavelet Transform takes in a column, returns a single val
 ##################################
 def waveletTransformProps(data):
-    coefficientArray = []
     # cA = Low Frequency Info, cD = High Frequency Info
     cA, cD = pywt.dwt(data, 'db1')
     
