@@ -11,7 +11,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 
-from Classes.Other.readWrite import readClassifier
+from .Classes.Other.readWrite import readClassifier
+from .dataSets import mergeInstanceData
 # Training Classification Algorithms
 ##################################
 
@@ -73,10 +74,9 @@ def testClassifier(classifier, x_test, y_test):
 
     return percentage
     
-def testClassifierOnNewData(classifierName, data, userID):
-    classifier = readClassifier('RF_2_88%.pkl',1)
-    x_test = data.ml_X
-    y_test = data.ml_y
+def testClassifierOnNewData(classifierName, instanceArray, userID):
+    classifier = readClassifier(classifierName,userID)
+    x_test, y_test = mergeInstanceData(instanceArray, 0, True)
     testClassifier(classifier,x_test,y_test)
 
     

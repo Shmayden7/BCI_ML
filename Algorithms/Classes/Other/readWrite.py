@@ -28,7 +28,7 @@ def writeTrainingDataInstance(instanceArray):
 ##################################
 def readClassifier(fileName, userID):
     filePath = getClassifierRef(userID)
-    classifier = pickle.load(open((filePath + fileName), 'rb'))
+    classifier = pickle.load(open((filePath + fileName) + '.pkl', 'rb'))
     print(f'Classifier has loaded!')
     return classifier
 

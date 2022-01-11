@@ -52,7 +52,7 @@ def createRandomDataset(userID, divisionID, featureID, nullPercentage, numOfFile
     return instanceArray
 ##################################
             
-def mergeInstanceData(instanceArray, testSizePercentage):
+def mergeInstanceData(instanceArray, testSizePercentage, newData = False):
     final_x = []
     final_y = []
 
@@ -66,9 +66,16 @@ def mergeInstanceData(instanceArray, testSizePercentage):
         for row in instance.ml_y:
             final_y.append(row)
 
-    x_train, x_test, y_train, y_test = train_test_split(final_x, final_y, test_size=testSizePercentage, random_state=42)
-
     print("\nTrainingData instances have been merged!")
     print(f"Total Data Entries: {len(final_x)}")
 
-    return x_train, x_test, y_train, y_test
+
+    if newData == True:
+        x_test = final_x
+        y_test = final_y
+
+        return x_test, y_test
+    else:
+        x_train, x_test, y_train, y_test = train_test_split(final_x, final_y, test_size=testSizePercentage, random_state=42)
+
+        return x_train, x_test, y_train, y_test
