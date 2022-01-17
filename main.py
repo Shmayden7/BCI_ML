@@ -1,6 +1,7 @@
 # Imports
 ##################################
-from Algorithms.Classes.Other.utilFunctions import getPKLRef
+#from Algorithms.Classes.Other.utilFunctions import getPKLRef
+import csv
 from Algorithms.algorithms import createAndTestAlgorithm
 from Algorithms.dataSets import createDataSet
 from Algorithms.Classes.Other.readWrite import readClassifier, writeClassifier, writeTrainingDataInstance, readTrainingDataInstance
@@ -12,14 +13,14 @@ import numpy as np
 # Universal Parameters
 ##################################
 userID = 1                     # Josh: 1, Ahmad: 2, #Eryn: 3, Sejune: 4
-numOfTrainingFiles = 1         # Number of CSV's used to create the training dataset
+numOfTrainingFiles = 5      # Number of CSV's used to create the training dataset
 testSizePercentage = 0.3       # Number of CSV's used to create the testing dataset              
 nullPercentage = 0.05          # Percent of 0's used in the data set    
 ##################################
 
-# LDA
+# LDA  
 ##################################
-divisionID_LDA = 1               # Determines which type of CSV files are read and how they're divided
+featureID_LDA = 1               # Determines which type of CSV files are read and how they're divided
 
 def runLDA():
 
@@ -27,15 +28,15 @@ def runLDA():
 
     }
 
-    data = createDataSet(userID, divisionID_LDA, nullPercentage, numOfTrainingFiles)
+    data = createDataSet(userID, featureID_LDA, nullPercentage, numOfTrainingFiles)
     classifierLDA, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'LDA', params)
 
-    writeClassifier(f'LDA_{divisionID_LDA}_{accuracy}%.pkl', classifierLDA, userID)
+    writeClassifier(f'LDA_{featureID_LDA}_{accuracy}%.pkl', classifierLDA, userID)
 ##################################
 
 # QDA
 ##################################
-divisionID_QDA = 1               # Determines which type of CSV files are read and how they're divided
+featureID_QDA = 1               # Determines which type of CSV files are read and how they're divided
 
 def runQDA():
 
@@ -43,15 +44,15 @@ def runQDA():
 
     }
 
-    data = createDataSet(userID, divisionID_QDA, nullPercentage, numOfTrainingFiles)
+    data = createDataSet(userID, featureID_QDA, nullPercentage, numOfTrainingFiles)
     classifierQDA, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'QDA', params)
 
-    writeClassifier(f'QDA_{divisionID_QDA}_{accuracy}%.pkl', classifierQDA, userID)
+    writeClassifier(f'QDA_{featureID_QDA}_{accuracy}%.pkl', classifierQDA, userID)
 ##################################
 
 # RF
 ##################################
-divisionID_RF = 2                # Determines which type of CSV files are read and how they're divided
+featureID_RF = 1                # Determines which type of CSV files are read and how they're divided
 
 def runRF():
 
@@ -62,15 +63,15 @@ def runRF():
     'n_jobs' : -1,
     'random_state': 0
     }
-    data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles)   
+    data = createDataSet(userID, featureID_RF, nullPercentage, numOfTrainingFiles, readPKL= False)   
     classifierRF, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'RF', params)
     
-    writeClassifier(f'RF_{divisionID_RF}_{accuracy}%.pkl', classifierRF, userID)
+    writeClassifier(f'RF_{featureID_RF}_{accuracy}  %.pkl', classifierRF, userID)
 ##################################
 
 # MLP
 ##################################
-divisionID_MLP = 1               # Determines which type of CSV files are read and how they're divided
+featureID_MLP = 1               # Determines which type of CSV files are read and how they're divided
 
 def runMLP():
     
@@ -83,23 +84,19 @@ def runMLP():
     # 'learning_rate': ,                              # allows you to set a seed for reproducing the same results
     }
 
-    data = createDataSet(userID, divisionID_MLP, nullPercentage, numOfTrainingFiles)
+    data = createDataSet(userID, featureID_MLP, nullPercentage, numOfTrainingFiles)
  
     classifierMLP, accuracy = createAndTestAlgorithm(data, testSizePercentage, 'MLP', params)
-
-    writeClassifier(f'MLP_{divisionID_MLP}_{accuracy}%.pkl', classifierMLP, userID)
+    writeClassifier(f'MLP_{featureID_MLP}_{accuracy}%.pkl', classifierMLP, userID)
 ##################################
 
 # Execution Code
 ##################################
 from Algorithms.Classes.Other.readWrite import readClassifier
-from Algorithms.algorithms import testClassifier
+from Algorithms.algorithms import testClassifierOnNewData
+from Algorithms.testingFeatures import testFeatures
 
-data = createDataSet(userID, divisionID_RF, nullPercentage, numOfTrainingFiles, readPKL=False) #Creates instance for csv file
-writeTrainingDataInstance(data) #Write instance to pkl
-classifier = readClassifier('RF_2_88%.pkl',1)
-x_test = data.ml_X
-y_test = data.ml_y
-testClassifier(classifier,x_test,y_test)
+instanceArray = createDataSet(userID, featureID_RF, nullPercentage, numOfTrainingFiles, readPKL= False)
+writeTrainingDataInstance(instanceArray)
 
 ################################## 

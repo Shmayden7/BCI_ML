@@ -3,8 +3,30 @@ import time
 # Datasets
 ##################################
 fileName = [
+    # Josh
+    'A-160308',
+    'A-160310',
+    'B-160225',
+    'B-160229',
     'C-160224',
+    'C-160302',
+    'E-160219',
+    'E-160226',
+    # Eryn
+    'F-160203',
+    'F-160204',
+    'G-160301',
+    'G-160322',
+    'H-160722',
+    'I-160609',
+    #Sejune
+    'K-161027',
+    'L-161116',
+    'M-161121',
+    'M-161124',
+    'B-160218',
     'E-160304',
+    # New Data set
     'F-160202',
     'G-160412',
     'H-160720',
@@ -37,7 +59,10 @@ def fillBucket(bucketNum, data):
 def getCSVRef(index, userID, divisionID):
     localPath = [
         f'/Users/Ayden/Documents/BCI/ML_Training/{sets[divisionID]}/',
-        'C:/Users/henrij2/Desktop/Work/Data/ProcessedData/',
+        'C:/Users/henrij2/Desktop/Work/Data/rawDataWithMarkers/',
+        ' ',
+        #Eryn,
+        #Sejune
     ]
 
     return (localPath[userID] + fileName[index] + '.csv')
@@ -45,6 +70,10 @@ def getCSVRef(index, userID, divisionID):
 def getPKLRef(index, userID, divisionID):
     localPath = [
         f'/Users/Ayden/Documents/BCI/ML_Training/{sets[divisionID]}/',
+        'C:/Users/henrij2/Desktop/Work/Data/lessDataPklFiles/',
+        ' ',
+        #Eryn,
+        #Sejune
     ]
 
     return (localPath[userID] + fileName[index] + '.pkl')
@@ -52,15 +81,7 @@ def getPKLRef(index, userID, divisionID):
 def getClassifierRef(userID):
     localPath = [
         '/Users/Ayden/Documents/BCI/ML_Training/classifiers/',
-        'C:/Users/henrij2/Desktop/Work/Classifiers/'
+        'C:/Users/henrij2/Desktop/Work/Classifiers/'       
     ]
 
     return localPath[userID]
-
-def sampleRateDelay(sampleRate, value):   #Delays returning the next data point from the csv file based on the sample rate of the data  
-    time1 = time.time()
-    while True:
-        if time.time() > (time1 + 1/sampleRate):  # check to see if a tenth of a second has passed
-            break
-
-    return value

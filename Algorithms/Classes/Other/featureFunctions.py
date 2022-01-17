@@ -159,3 +159,51 @@ def waveletTransformProps(data):
 
     return props
 ##################################
+
+#Sample Entropy
+##################################
+def SampEnt(data):
+    N = len(data)
+    B = 0.0
+    A = 0.0
+    m = 5
+    r = 2
+    
+    # Split time series and save all templates of length m
+    xmi = np.array([data[i : i + m] for i in range(N - m)])
+    xmj = np.array([data[i : i + m] for i in range(N - m + 1)])
+
+    # Save all matches minus the self-match, compute B
+    B = np.sum([np.sum(np.abs(xmii - xmj).max(axis=1) <= r) - 1 for xmii in xmi])
+
+    # Similar for computing A
+    m += 1
+    xm = np.array([data[i : i + m] for i in range(N - m + 1)])
+
+    A = np.sum([np.sum(np.abs(xmi - xm).max(axis=1) <= r) - 1 for xmi in xm])
+
+    # Return SampEn
+    return -np.log(A / B)
+##################################
+
+#Hjorth Mobility
+##################################
+def hMob(data):
+    var_y = np.var(data)
+    var_dy = np.var(np.gradient(data))
+
+    return np.sqrt(var_dy/var_y)
+##################################
+
+#Average Power
+##################################
+def avgPow(bucket):
+    avgPowArray = [] 
+
+    for col in bucket:
+        sum = 0
+        sum = (col**2).sum()
+        avgPowArray.append((sum/col.size)**0.5)
+
+    return avgPowArray
+##################################

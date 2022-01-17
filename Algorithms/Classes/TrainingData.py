@@ -7,7 +7,7 @@ from scipy.sparse import data
 
 from .Other.determiningFeatures import getRowFromBucket
 from .Other.preProcessing import bandpassFilter
-from .Other.featureFunctions import bandPower, waveletTransformProps
+from .Other.featureFunctions import bandPower, waveletTransformProps, SampEnt, hMob
 ##################################
 
 class TrainingData:
@@ -21,10 +21,10 @@ class TrainingData:
     ml_y = []
     divisionID = 0
 
-    def __init__(self, filePath, divisionID, nullPercentage = 0.3):
+    def __init__(self, filePath, featureID, nullPercentage = 0.3):
         self.filePath = filePath
         self.nullPercentage = nullPercentage
-        self.divisionID = divisionID
+        self.featureID = featureID
 
         # Updating frequency for high frequency files
         lastLetters = filePath[-9:-4]
@@ -93,6 +93,10 @@ class TrainingData:
         y = []
         dataRowEntries = 0
         numOfZeroes = 0
+        numOfOnes = 0
+        numOfTwos = 0
+        numOfFours = 0
+        numOfSixes = 0
         timeFrame = 10
         window = timeFrame * self.frequency
 
@@ -108,8 +112,8 @@ class TrainingData:
         for col in range(totalColumns - 1):
             tic2 = time.perf_counter()
             print(f'Current Col: {col}')
-            alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev = [],[],[],[],[],[],[],[],[],[],[],[]
-            for row in range(window,len(self.data[col])):
+            alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev, sampEnt, hMobility = [],[],[],[],[],[],[],[],[],[],[],[],[],[]
+            for row in range(window, int(len(self.data[col]) / 2)):
             # for row in range(window, window + 100): # TESTING
                 if (row % 100000) == 0: 
                     print(f'Current Row: {row}')
@@ -120,23 +124,37 @@ class TrainingData:
                     start = row - window
                     end = row
 
-                # Adding features to the ml_X and ml_y attributes
-                alphaCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
-                betaCol.append(bandPower(self.data[col][start:end], 'beta', self.frequency, timeFrame))
+                # Adding features to the ml_X attributes
+                #tic3 = time.perf_counter()
+
+                #(self.data[col][start:end])
+                if self.featureID == 1:
+                    alphaCol.append(bandPower(self.data[col][start:end], 'alpha', self.frequency, timeFrame))
+                    betaCol.append(bandPower(self.data[col][start:end], 'beta', self.frequency, timeFrame))
                 
-                props = waveletTransformProps(self.data[col][start:end])
+                    props = waveletTransformProps(self.data[col][start:end])
 
-                cA_max.append(props['cA']['max'])
-                cA_min.append(props['cA']['min'])
-                cA_mean.append(props['cA']['mean'])
-                cA_median.append(props['cA']['median'])
-                cA_stDev.append(props['cA']['stDev'])
+                    cA_max.append(props['cA']['max'])
+                    cA_min.append(props['cA']['min'])
+                    cA_mean.append(props['cA']['mean'])
+                    cA_median.append(props['cA']['median'])
+                    cA_stDev.append(props['cA']['stDev'])
 
-                cD_max.append(props['cD']['max'])
-                cD_min.append(props['cD']['min'])
-                cD_mean.append(props['cD']['mean'])
-                cD_median.append(props['cD']['median'])
-                cD_stDev.append(props['cD']['stDev'])
+                    cD_max.append(props['cD']['max'])
+                    cD_min.append(props['cD']['min'])
+                    cD_mean.append(props['cD']['mean'])
+                    cD_median.append(props['cD']['median'])
+                    cD_stDev.append(props['cD']['stDev'])
+
+                    #hMobility.append(hMob(self.data[col][start:end]))
+
+
+
+                #sampEnt.append(sampEnt(self.data[col][start:end]))
+
+                #toc3 = time.perf_counter()
+
+                #print(f"Calculated features in {toc3 - tic3}s")
 
             # Appending columns to data attribute
             self.data.append(alphaCol)
@@ -154,8 +172,10 @@ class TrainingData:
             self.data.append(cD_median)
             self.data.append(cD_stDev)
 
+            #self.data.append(hMobility)
+
             # Removing the top rows of eeg data for each channel, 'window' long
-            self.data[col] = self.data[col][window:]
+            self.data[col] = self.data[col][window: int(len(self.data[col]) / 2)]
 
             toc2 = time.perf_counter()
             print(f'Column {col} filled in {toc2 - tic2:0.4}s')
@@ -163,14 +183,17 @@ class TrainingData:
             print(f'Number of Entries in column {col}: {len(self.data[col])}')
             print(f'Total Number of Columns: {len(self.data)}')
 
-
         # Move Y col from middle to end of self.data
         tempCol = self.data[8]
         self.data.pop(8)
         self.data.append(tempCol)
 
         # Removing the top rows of 'window' length from marker col
-        self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:]
+        self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:int(len(self.data[len(self.data) - 1]) / 2)]
+
+        ####################################
+        # Feature Selection
+        ####################################
 
         print(f'Length of C1 After: {len(self.data[0])}')
         print(f'Length of Markers After: {len(self.data[len(self.data) - 1])}')
@@ -184,9 +207,19 @@ class TrainingData:
             currentMarkerValue = self.data[len(self.data)-1][row]
 
             if currentMarkerValue == 0 or currentMarkerValue == 91 or currentMarkerValue == 92 or currentMarkerValue == 99 or currentMarkerValue == 3 or currentMarkerValue == 5:
-                    returnMarkerValue = 0
-                    numOfZeroes += 1
-            else: 
+                returnMarkerValue = 0
+                numOfZeroes += 1
+            elif currentMarkerValue == 1: 
+                numOfOnes += 1
+                returnMarkerValue = currentMarkerValue
+            elif currentMarkerValue == 2: 
+                numOfTwos += 1
+                returnMarkerValue = currentMarkerValue
+            elif currentMarkerValue == 4: 
+                numOfFours += 1
+                returnMarkerValue = currentMarkerValue
+            elif currentMarkerValue == 6: 
+                numOfSixes += 1
                 returnMarkerValue = currentMarkerValue
 
             #Check if null percentage has been reached
@@ -203,9 +236,16 @@ class TrainingData:
             x.append(currentRow)
 
         toc1 = time.perf_counter()
-        self.ml_X = x
-        self.ml_y = y
+        self.ml_X= x
+        self.ml_y  = y
         print(f'Num of Rows in ml_X: {len(self.ml_X)}')
         print(f'Num of Cols in ml_x: {len(self.ml_X[0])}')
-        print(f'Num of Rows in ml_y: {len(self.ml_y)}')
+        print(f'Num of Rows in ml_y: {len(self.ml_y)}\n')
+
+        print(f'Num of Zeroes: {numOfZeroes}')
+        print(f'Num of Ones: {numOfOnes}')
+        print(f'Num of Twos: {numOfTwos}')
+        print(f'Num of Fours: {numOfFours}')
+        print(f'Num of Sixes: {numOfSixes}\n')
+
         print(f"{dataRowEntries} Data entries have been filled in {toc1 - tic1:0.4}s!")
