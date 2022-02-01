@@ -5,7 +5,7 @@ import math
 import pywt
 
 from scipy.integrate import simps
-from scipy.signal import welch
+from scipy.signal import welch, coherence, lfilter 
 ##################################
 
 # Feature Functions
@@ -195,6 +195,14 @@ def hMob(data):
     return np.sqrt(var_dy/var_y)
 ##################################
 
+#Hjorth Complexity
+##################################
+def hCom(data):
+    dy = np.gradient(data)
+
+    return hMob(dy)/hMob(data)
+##################################
+
 #Average Power
 ##################################
 def avgPow(bucket):
@@ -207,3 +215,20 @@ def avgPow(bucket):
 
     return avgPowArray
 ##################################
+
+# Auto Regression Coefficient mean
+##################################
+def autoRegCoeff(data):
+    sum = 0 
+    m = 10 #order
+    yt = data[len(data) - 1]
+
+    for i in range(m):
+        if data[i*10] == 0:
+            continue
+        else:
+            coeff = yt / data[i*10]
+        
+        sum += coeff
+
+    return sum / m
