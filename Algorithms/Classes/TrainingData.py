@@ -7,7 +7,7 @@ from scipy.sparse import data
 
 from .Other.determiningFeatures import getRowFromBucket
 from .Other.preProcessing import bandpassFilter
-from .Other.featureFunctions import bandPower, waveletTransformProps, SampEnt, hMob
+from .Other.featureFunctions import bandPower, waveletTransformProps, SampEnt, hMob, hCom, autoRegCoeff
 ##################################
 
 class TrainingData:
@@ -112,8 +112,8 @@ class TrainingData:
         for col in range(totalColumns - 1):
             tic2 = time.perf_counter()
             print(f'Current Col: {col}')
-            alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev, sampEnt, hMobility = [],[],[],[],[],[],[],[],[],[],[],[],[],[]
-            for row in range(window, int(len(self.data[col]) / 2)):
+            alphaCol, betaCol, cA_max, cA_min, cA_mean, cA_median, cA_stDev, cD_max, cD_min, cD_mean, cD_median, cD_stDev, sampEnt, hMobility, hComplexity, autoReg = [],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]
+            for row in range(window, int(len(self.data[col]) / 4)):
             # for row in range(window, window + 100): # TESTING
                 if (row % 100000) == 0: 
                     print(f'Current Row: {row}')
@@ -125,7 +125,7 @@ class TrainingData:
                     end = row
 
                 # Adding features to the ml_X attributes
-                #tic3 = time.perf_counter()
+                tic3 = time.perf_counter()
 
                 #(self.data[col][start:end])
                 if self.featureID == 1:
@@ -146,36 +146,74 @@ class TrainingData:
                     cD_median.append(props['cD']['median'])
                     cD_stDev.append(props['cD']['stDev'])
 
-                    #hMobility.append(hMob(self.data[col][start:end]))
+                elif self.featureID == 2:
+                    hMobility.append(hMob(self.data[col][start:end]))
+                    hComplexity.append(hCom(self.data[col][start:end]))
+
+                    autoReg.append(autoRegCoeff(self.data[col][start:end]))
+
+                elif self.featureID == 5:
+                    betaCol.append(bandPower(self.data[col][start:end], 'beta', self.frequency, timeFrame))
+
+                    hMobility.append(hMob(self.data[col][start:end]))
+
+                    props = waveletTransformProps(self.data[col][start:end])
+
+                    cA_max.append(props['cA']['max'])
+                    cA_min.append(props['cA']['min'])
+                    cA_stDev.append(props['cA']['stDev'])
+
+                    cD_max.append(props['cD']['max'])
+                    cD_min.append(props['cD']['min'])
+                    cD_stDev.append(props['cD']['stDev'])
 
 
 
                 #sampEnt.append(sampEnt(self.data[col][start:end]))
 
-                #toc3 = time.perf_counter()
+                toc3 = time.perf_counter()
 
-                #print(f"Calculated features in {toc3 - tic3}s")
+                print(f"Calculated features in {toc3 - tic3}s")
 
             # Appending columns to data attribute
-            self.data.append(alphaCol)
-            self.data.append(betaCol)
+            if self.featureID == 1:
+                self.data.append(alphaCol)
+                self.data.append(betaCol)
 
-            self.data.append(cA_max)
-            self.data.append(cA_min)
-            self.data.append(cA_mean)
-            self.data.append(cA_median)
-            self.data.append(cA_stDev)
+                self.data.append(cA_max)
+                self.data.append(cA_min)
+                self.data.append(cA_mean)
+                self.data.append(cA_median)
+                self.data.append(cA_stDev)
+                
+                self.data.append(cD_max)
+                self.data.append(cD_min)
+                self.data.append(cD_mean)
+                self.data.append(cD_median)
+                self.data.append(cD_stDev)
             
-            self.data.append(cD_max)
-            self.data.append(cD_min)
-            self.data.append(cD_mean)
-            self.data.append(cD_median)
-            self.data.append(cD_stDev)
+            elif self.featureID == 2:
+                self.data.append(hMobility)
+                self.data.append(hComplexity)
+                self.data.append(autoReg)
 
-            #self.data.append(hMobility)
+            elif self.featureID == 5:
+                self.data.append(betaCol)
+
+                self.data.append(hMobility)
+
+                self.data.append(cA_max)
+                self.data.append(cA_min)
+                self.data.append(cA_stDev)
+
+                self.data.append(cD_max)
+                self.data.append(cD_min)
+                self.data.append(cD_stDev)
+
+          
 
             # Removing the top rows of eeg data for each channel, 'window' long
-            self.data[col] = self.data[col][window: int(len(self.data[col]) / 2)]
+            self.data[col] = self.data[col][window: int(len(self.data[col]) / 4)]
 
             toc2 = time.perf_counter()
             print(f'Column {col} filled in {toc2 - tic2:0.4}s')
@@ -189,7 +227,7 @@ class TrainingData:
         self.data.append(tempCol)
 
         # Removing the top rows of 'window' length from marker col
-        self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:int(len(self.data[len(self.data) - 1]) / 2)]
+        self.data[len(self.data) - 1] = self.data[len(self.data) - 1][window:int(len(self.data[len(self.data) - 1]) / 4)]
 
         ####################################
         # Feature Selection
