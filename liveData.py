@@ -15,13 +15,13 @@ from Algorithms.preProcessing import bandpassFilter
 from Algorithms.Classes.Other.featureFunctions import bandPower, waveletTransformProps, SampEnt, hMob, hCom, autoRegCoeff
 ##################################
 
-def cutoffData(filteredData, timeFrame):
+def cutoffData(filteredData, time):
     fs = 250
 
-    if len(filteredData[0]) <= timeFrame * fs:
+    if len(filteredData[0]) <= time * fs:
         return filteredData
     else:
-        start = len(filteredData[0]) - timeFrame*fs
+        start = len(filteredData[0]) - time*fs
         end = len(filteredData[0]) -1
         filteredData[0] = filteredData[0][start:end]
         filteredData[1] = filteredData[1][start:end]
@@ -120,25 +120,30 @@ def makeFeatures(filteredData, featureID, timeFrame):
 
             filteredData.append(cD_max)
             filteredData.append(cD_min)
-            filteredData.append(cD_stDev)
-            
-                
+            filteredData.append(cD_stDev)            
 
     featureRow = []
     for col in filteredData:
         featureRow.append(col[len(col) - 1])
 
+
     del filteredData[8:]
 
     return featureRow
  
+
+def scaleFeatureRow(featureRow):
+    scaledFeatures = featureRow
+
+    return scaledFeatures
+    
 def main():
     # Bandpass Filter Variables
     sampleFreq = 250
     lowCut = 5.0
     highCut = 33.0
     order = 5
-    timeFrame = 10 # Window of time where samples of data are used to calculate features
+    timeFrame = 5 # Window of time where samples of data are used to calculate features
     featureID = 1
     # Connecting board to Python project
     ##################################
@@ -174,15 +179,18 @@ def main():
         #liveData *= SCALE_FACTOR_EEG
         #Filters data based on timeFrame seconds
         
-        filteredData = bandpassFilter(liveData, timeFrame, lowCut, highCut, sampleFreq, order)
-        filteredData = cutoffData(filteredData, timeFrame)
+        filteredData = bandpassFilter(liveData, timeFrame + 1, lowCut, highCut, sampleFreq, order)
+        
+        #filteredData = cutoffData(filteredData, timeFrame)
 
        
         tic = time.perf_counter()
 
-        if len(filteredData[0]) >= sampleFreq * 2:
+        
 
-            featureRow = makeFeatures(filteredData, featureID, 2)
+        if len(filteredData[0]) >= sampleFreq * timeFrame:
+
+            featureRow = makeFeatures(filteredData, featureID, timeFrame)
 
             toc = time.perf_counter()
 
